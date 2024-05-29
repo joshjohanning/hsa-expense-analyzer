@@ -2,21 +2,24 @@
 
 Analyzes HSA expense totals by year from a folder of receipts.
 
-## File format
+## File Structure
 
-Expects files to be in single folder with this format
+Expects files to be in single folder with the following naming convention: `<yyyy-mm-dd> - <description> - $<total>.ext`
+
+Example:
 
 ```text
 <dirPath>/
-├── 2024-01-01 - doctor - $50.00.pdf
-├── 2023-01-01 - doctor - $45.00.pdf
-└── 2023-01-02 - doctor - $45.00.pdf
+├── 2021-01-01 - doctor - $45.00.pdf
+├── 2022-02-01 - doctor - $75.00.pdf
+├── 2022-02-02 - doctor - $75.00.pdf
+├── 2023-03-01 - doctor - $45.00.pdf
+├── 2023-03-02 - doctor - $45.00.pdf
+└── 2024-04-01 - doctor - $50.00.pdf
 ```
 
-Notes:
-
-- File extension is not important; only the date and $ amount are used
-- My receipts are all in the same directory
+> [!NOTE]  
+> File extension is not important; only the date and $ amount are used
 
 ## Running
 
@@ -28,6 +31,12 @@ npm run start -- --dirPath="/path/to/receipts"
 ## Example Output
 
 ```text
+2021:
+  total:    $75.00
+  receipts: 1
+2022:
+  total:    $150
+  receipts: 2
 2023:
   total:    $90.00
   receipts: 2
