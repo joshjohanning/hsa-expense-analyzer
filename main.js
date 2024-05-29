@@ -1,21 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const prettyjson = require('prettyjson');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const fs = require("fs");
+const path = require("path");
+const prettyjson = require("prettyjson");
+const yargs = require("yargs/yargs");
+const { hideBin } = require("yargs/helpers");
 
-const argv = yargs(hideBin(process.argv))
-  .option('dirPath', {
-    type: 'string',
-    demandOption: true,
-    describe: 'The directory path'
-  })
-  .argv;
+const argv = yargs(hideBin(process.argv)).option("dirPath", {
+  type: "string",
+  demandOption: true,
+  describe: "The directory path",
+}).argv;
 
 const dirPath = argv.dirPath;
 
 function parseFileName(fileName) {
-  const parts = fileName.split(' - ');
+  const parts = fileName.split(" - ");
   if (parts.length !== 3) {
     console.error(`File does not match expected format: ${fileName}`);
     return { year: null, amount: 0 };
@@ -27,7 +25,7 @@ function parseFileName(fileName) {
   if (amountPart && !isNaN(parseFloat(amountPart.substring(1)))) {
     amount = parseFloat(amountPart.substring(1));
   }
-  const year = date.split('-')[0];
+  const year = date.split("-")[0];
 
   return { year, amount };
 }
@@ -37,22 +35,22 @@ function getTotalsByYear(dirPath) {
   const receiptCounts = {};
   const fileNames = fs.readdirSync(dirPath);
 
-  fileNames.forEach(fileName => {
-    if (fileName.startsWith('.')) {
+  fileNames.forEach((fileName) => {
+    if (fileName.startsWith(".")) {
       return;
     }
 
     const { year, amount } = parseFileName(fileName);
     if (amount > 0) {
-        if (totalsByYear[year]) {
-            totalsByYear[year] = +(totalsByYear[year] + amount).toFixed(2);
-            receiptCounts[year]++;
-        } else {
-            totalsByYear[year] = amount;
-            receiptCounts[year] = 1;
-        }
+      if (totalsByYear[year]) {
+        totalsByYear[year] = +(totalsByYear[year] + amount).toFixed(2);
+        receiptCounts[year]++;
+      } else {
+        totalsByYear[year] = amount;
+        receiptCounts[year] = 1;
+      }
     }
-});
+  });
 
   return { totalsByYear, receiptCounts };
 }
@@ -64,7 +62,7 @@ const result = {};
 for (const year in totalsByYear) {
   result[year] = {
     total: `$${totalsByYear[year].toFixed(2)}`,
-    receipts: receiptCounts[year]
+    receipts: receiptCounts[year],
   };
 }
 

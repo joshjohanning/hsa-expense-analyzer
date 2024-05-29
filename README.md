@@ -27,10 +27,10 @@ npm run start -- --dirPath="/path/to/receipts"
 ## Example Output
 
 ```text
-2023: 
+2023:
   total:    $90.00
   receipts: 2
-2024: 
+2024:
   total:    $50.00
   receipts: 1
 ```
