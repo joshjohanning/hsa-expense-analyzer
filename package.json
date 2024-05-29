@@ -3,6 +3,7 @@
     "start": "node main.js"
   },
   "dependencies": {
+    "chartscii": "^3.0.1",
     "prettyjson": "^1.2.5",
     "yargs": "^17.7.2"
   }

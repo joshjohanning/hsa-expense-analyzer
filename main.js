@@ -3,6 +3,7 @@ const path = require("path");
 const prettyjson = require("prettyjson");
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
+const chartscii = require("chartscii");
 
 const argv = yargs(hideBin(process.argv)).option("dirPath", {
   type: "string",
@@ -67,3 +68,22 @@ for (const year in totalsByYear) {
 }
 
 console.log(prettyjson.render(result));
+console.log();
+
+const data = [];
+
+for (const year in totalsByYear) {
+  data.push({
+    label: year,
+    value: totalsByYear[year],
+  });
+}
+
+const chart = new chartscii(data, {
+  width: 20,
+  height: 5,
+  title: "Totals by year",
+  fill: "░",
+});
+
+console.log(chart.create());
