@@ -16,6 +16,11 @@ const dirPath = argv.dirPath;
 
 function parseFileName(fileName) {
   const parts = fileName.split(' - ');
+  if (parts.length !== 3) {
+    console.error(`File does not match expected format: ${fileName}`);
+    return { year: null, amount: 0 };
+  }
+
   const date = parts[0];
   const amountPart = parts[2];
   let amount = 0;
@@ -32,7 +37,10 @@ function getTotalsByYear(dirPath) {
   const receiptCounts = {};
   const fileNames = fs.readdirSync(dirPath);
 
-fileNames.forEach(fileName => {
+  fileNames.forEach(fileName => {
+    if (fileName.startsWith('.')) {
+      return;
+    }
 
     const { year, amount } = parseFileName(fileName);
     if (amount > 0) {
