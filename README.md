@@ -4,7 +4,9 @@ Analyzes HSA expense totals by year from a folder of receipts.
 
 ## File Structure
 
-Expects files to be in single folder with the following naming convention: `<yyyy-mm-dd> - <description> - $<total>.ext`
+Expects files to be in single folder with the following naming convention:
+
+`<yyyy-mm-dd> - <description> - $<total>.ext`
 
 Example:
 
@@ -35,7 +37,7 @@ npm run start -- --dirPath="/path/to/receipts"
   total:    $75.00
   receipts: 1
 2022:
-  total:    $150
+  total:    $150.00
   receipts: 2
 2023:
   total:    $90.00
