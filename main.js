@@ -84,6 +84,7 @@ const chart = new chartscii(data, {
   height: 5,
   title: "Totals by year",
   fill: "░",
+  valueLabels: true,
 });
 
 console.log(chart.create());
