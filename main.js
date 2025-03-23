@@ -3,7 +3,7 @@ const path = require("path");
 const prettyjson = require("prettyjson");
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
-const chartscii = require("chartscii");
+const chartscii = require("@joshjohanning/chartscii");
 
 const argv = yargs(hideBin(process.argv)).option("dirPath", {
   type: "string",
