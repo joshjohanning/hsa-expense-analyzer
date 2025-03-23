@@ -1,4 +1,5 @@
 {
+  "version": "0.0.3",
   "scripts": {
     "start": "node main.js"
   },
