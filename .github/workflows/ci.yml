@@ -25,4 +25,4 @@ jobs:
       run: npm ci
 
     - name: Run application
-      run: npm start --version
+      run: npm run start -- --version
