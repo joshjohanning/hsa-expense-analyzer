@@ -1,6 +1,8 @@
 # hsa-expense-analyzer
 
-Analyzes HSA expense totals by year from a folder of receipts.
+🩺 🧾 📊 Analyzes HSA expense totals by year from a folder of receipts.
+
+<img src="https://github.com/user-attachments/assets/9fff5263-ddc7-4bc3-a1ca-e7e2c8d04f9f" alt="hsa-expense-analyzer example results" width="75%">
 
 ## File Structure
 
