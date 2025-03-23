@@ -17,7 +17,7 @@ function parseFileName(fileName) {
   const parts = fileName.split(" - ");
   if (parts.length !== 3) {
     console.error(`File does not match expected format: ${fileName}`);
-    return { year: null, amount: 0 };
+    return { year: null, amount: 0, isReimbursement: false };
   }
 
   const date = parts[0];
@@ -27,12 +27,16 @@ function parseFileName(fileName) {
     amount = parseFloat(amountPart.substring(1));
   }
   const year = date.split("-")[0];
-
-  return { year, amount };
+  
+  // Check if this is a reimbursement
+  const isReimbursement = fileName.includes('.reimbursement.');
+  
+  return { year, amount, isReimbursement };
 }
 
 function getTotalsByYear(dirPath) {
-  const totalsByYear = {};
+  const expensesByYear = {};
+  const reimbursementsByYear = {};
   const receiptCounts = {};
   const fileNames = fs.readdirSync(dirPath);
 
@@ -41,28 +45,38 @@ function getTotalsByYear(dirPath) {
       return;
     }
 
-    const { year, amount } = parseFileName(fileName);
+    const { year, amount, isReimbursement } = parseFileName(fileName);
     if (amount > 0) {
-      if (totalsByYear[year]) {
-        totalsByYear[year] = +(totalsByYear[year] + amount).toFixed(2);
-        receiptCounts[year]++;
-      } else {
-        totalsByYear[year] = amount;
-        receiptCounts[year] = 1;
+      // Initialize year data if not exists
+      if (!expensesByYear[year]) {
+        expensesByYear[year] = 0;
+        reimbursementsByYear[year] = 0;
+        receiptCounts[year] = 0;
       }
+      
+      // Track either as expense or reimbursement
+      if (isReimbursement) {
+        reimbursementsByYear[year] = +(reimbursementsByYear[year] + amount).toFixed(2);
+      } else {
+        expensesByYear[year] = +(expensesByYear[year] + amount).toFixed(2);
+      }
+      
+      receiptCounts[year]++;
     }
   });
 
-  return { totalsByYear, receiptCounts };
+  return { expensesByYear, reimbursementsByYear, receiptCounts };
 }
 
-const { totalsByYear, receiptCounts } = getTotalsByYear(dirPath);
+const { expensesByYear, reimbursementsByYear, receiptCounts } = getTotalsByYear(dirPath);
 
 const result = {};
+const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 
-for (const year in totalsByYear) {
+for (const year of years) {
   result[year] = {
-    total: `$${totalsByYear[year].toFixed(2)}`,
+    expenses: `$${(expensesByYear[year] || 0).toFixed(2)}`,
+    reimbursements: `$${(reimbursementsByYear[year] || 0).toFixed(2)}`,
     receipts: receiptCounts[year],
   };
 }
@@ -70,21 +84,80 @@ for (const year in totalsByYear) {
 console.log(prettyjson.render(result));
 console.log();
 
-const data = [];
+// Create data arrays for charts
+const expenseData = [];
+const reimbursementData = [];
+const combinedData = [];
 
-for (const year in totalsByYear) {
-  data.push({
+for (const year of years) {
+  const expenseAmount = expensesByYear[year] || 0;
+  const reimbursementAmount = reimbursementsByYear[year] || 0;
+  
+  expenseData.push({
     label: year,
-    value: totalsByYear[year],
+    value: expenseAmount,
+  });
+  
+  reimbursementData.push({
+    label: year,
+    value: reimbursementAmount,
+  });
+  
+  // For combined chart
+  combinedData.push({
+    label: `${year} Exp`,
+    value: expenseAmount,
+  });
+  
+  combinedData.push({
+    label: `${year} Rei`,
+    value: reimbursementAmount,
   });
 }
 
-const chart = new chartscii(data, {
+const chart = new chartscii(expenseData, {
   width: 20,
-  height: 5,
-  title: "Totals by year",
+  height: years.length,
+  title: "Expenses by year",
   fill: "░",
   valueLabels: true,
+  valueLabelsPrefix: "$",
+  valueLabelsDecimalPlaces: 2
+});
+
+const reimbursementChart = new chartscii(reimbursementData, {
+  width: 20,
+  height: years.length,
+  title: "Reimbursement by year", 
+  fill: "░",
+  valueLabels: true,
+  valueLabelsPrefix: "$",
+  valueLabelsDecimalPlaces: 2
 });
 
 console.log(chart.create());
+console.log();
+console.log(reimbursementChart.create());
+console.log();
+
+// Create a manual comparison chart
+console.log("Comparison by year:");
+const maxValue = Math.max(
+  ...Object.values(expensesByYear),
+  ...Object.values(reimbursementsByYear)
+);
+
+for (const year of years) {
+  const expenseAmount = expensesByYear[year] || 0;
+  const reimbursementAmount = reimbursementsByYear[year] || 0;
+  
+  const expenseBarLength = Math.floor((expenseAmount / maxValue) * 20);
+  const reimbursementBarLength = Math.floor((reimbursementAmount / maxValue) * 20);
+  
+  const expenseBar = "█".repeat(expenseBarLength) + "░".repeat(20 - expenseBarLength);
+  const reimbursementBar = "█".repeat(reimbursementBarLength) + "░".repeat(20 - reimbursementBarLength);
+  
+  console.log(`${year} Expenses       ╢${expenseBar} $${expenseAmount.toFixed(2)}`);
+  console.log(`${year} Reimbursements ╢${reimbursementBar} $${reimbursementAmount.toFixed(2)}`);}
+
+console.log("                    ╚════════════════════");

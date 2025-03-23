@@ -4,7 +4,8 @@
     "start": "node main.js"
   },
   "dependencies": {
-    "chartscii": "^3.1.0",
+    "@joshjohanning/chartscii": "^3.2.0",
+    "chartscii": "https://github.com/joshjohanning/chartscii/tarball/add-value-labels-decimal-places-dist",
     "prettyjson": "^1.2.5",
     "yargs": "^17.7.2"
   }

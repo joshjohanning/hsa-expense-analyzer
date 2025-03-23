@@ -8,22 +8,26 @@
 
 Expects files to be in single folder with the following naming convention:
 
-`<yyyy-mm-dd> - <description> - $<total>.ext`
+For expenses:
+`<yyyy-mm-dd> - <description> - $<total>.pdf|png|jpg|whatever`
+
+For reimbursements:
+`<yyyy-mm-dd> - <description> - $<total>.reimbursement.pdf|png|jpg|whatever`
 
 Example:
 
 ```text
 <dirPath>/
-├── 2021-01-01 - doctor - $45.00.pdf
-├── 2022-02-01 - doctor - $75.00.pdf
-├── 2022-02-02 - doctor - $75.00.pdf
-├── 2023-03-01 - doctor - $45.00.pdf
-├── 2023-03-02 - doctor - $45.00.pdf
-└── 2024-04-01 - doctor - $50.00.pdf
+├── 2021-01-01 - doctor - $45.00.pdf                              # Expense
+├── 2021-02-15 - doctor reimbursement - $45.00.reimbursement.pdf  # Reimbursement
+├── 2022-02-01 - doctor - $75.00.png                              # Expense
+├── 2022-02-02 - pharmacy - $75.00.pdf                            # Expense
+└── 2022-03-15 - hsa withdrawal - $150.00.reimbursement.pdf       # Reimbursement
 ```
 
 > [!NOTE]  
-> File extension is not important; only the date and $ amount are used
+> Any file extension for receipts is fine; only the date and $ amount are used
+> The script detects reimbursements by looking for `.reimbursement.` anywhere in the filename.
 
 ## Running
 
@@ -36,22 +40,33 @@ npm run start -- --dirPath="/path/to/receipts"
 
 ```text
 2021:
-  total:    $75.00
-  receipts: 1
+  expenses:      $45.00
+  reimbursement: $30.00
+  receipts:      2
 2022:
-  total:    $150.00
-  receipts: 2
+  expenses:      $150.00
+  reimbursement: $100.00
+  receipts:      3
 2023:
-  total:    $90.00
-  receipts: 2
+  expenses:      $90.00
+  reimbursement: $0.00
+  receipts:      2
 2024:
-  total:    $50.00
-  receipts: 1
+  expenses:      $50.00
+  reimbursement: $0.00
+  receipts:      1
 
-Totals by year
-2021 ╢██████████░░░░░░░░░░ 75.00
+Expenses by year
+2021 ╢██████░░░░░░░░░░░░░░ 45.00
 2022 ╢████████████████████ 150.00
-2023 ╢████████████░░░░░░░░ 90.00
-2024 ╢███████░░░░░░░░░░░░░ 50.00
-     ╚════════════════════
+
+Reimbursements by year
+2021 ╢██████░░░░░░░░░░░░░░ 30.00
+2022 ╢████████████████████ 100.00
+
+Comparison by year:
+2021 Expenses       ╢██████░░░░░░░░░░░░░░ 45.00
+2021 Reimbursements ╢████░░░░░░░░░░░░░░░░ 30.00
+2022 Expenses       ╢████████████████████ 150.00
+2022 Reimbursements ╢███████████████░░░░░ 100.00
 ```
