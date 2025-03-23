@@ -1,10 +1,11 @@
 {
-  "version": "0.0.3",
+  "version": "0.1.0",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test": "node main.js --dirPath=./test-data"
   },
   "dependencies": {
-    "chartscii": "^3.1.0",
+    "@joshjohanning/chartscii": "^3.2.0",
     "prettyjson": "^1.2.5",
     "yargs": "^17.7.2"
   }
