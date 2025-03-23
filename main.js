@@ -29,7 +29,7 @@ function parseFileName(fileName) {
   const year = date.split("-")[0];
   
   // Check if this is a reimbursement
-  const isReimbursement = fileName.includes('.reimbursement.');
+  const isReimbursement = fileName.includes('.reimbursed.');
   
   return { year, amount, isReimbursement };
 }
@@ -54,11 +54,12 @@ function getTotalsByYear(dirPath) {
         receiptCounts[year] = 0;
       }
       
-      // Track either as expense or reimbursement
+      // Always count as an expense regardless of reimbursement status
+      expensesByYear[year] = +(expensesByYear[year] + amount).toFixed(2);
+      
+      // Additionally track as reimbursement if applicable
       if (isReimbursement) {
         reimbursementsByYear[year] = +(reimbursementsByYear[year] + amount).toFixed(2);
-      } else {
-        expensesByYear[year] = +(expensesByYear[year] + amount).toFixed(2);
       }
       
       receiptCounts[year]++;
@@ -128,7 +129,7 @@ const chart = new chartscii(expenseData, {
 const reimbursementChart = new chartscii(reimbursementData, {
   width: 20,
   height: years.length,
-  title: "Reimbursement by year", 
+  title: "Reimbursements by year", 
   fill: "░",
   valueLabels: true,
   valueLabelsPrefix: "$",
