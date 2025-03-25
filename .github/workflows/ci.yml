@@ -20,11 +20,6 @@ jobs:
       with:
         node-version: 22
         cache: 'npm'
-        registry-url: 'https://npm.pkg.github.com'
-        scope: '@joshjohanning'
-        always-auth: true
-      env:
-        NODE_AUTH_TOKEN: ${{ github.token }}
 
     - name: Install dependencies
       run: npm ci

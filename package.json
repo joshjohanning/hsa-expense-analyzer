@@ -5,7 +5,7 @@
     "test": "node main.js --dirPath=./test-data"
   },
   "dependencies": {
-    "@joshjohanning/chartscii": "^3.2.0",
+    "chartscii": "^3.2.0",
     "prettyjson": "^1.2.5",
     "yargs": "^17.7.2"
   }

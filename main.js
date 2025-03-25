@@ -3,7 +3,7 @@ const path = require("path");
 const prettyjson = require("prettyjson");
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
-const chartscii = require("@joshjohanning/chartscii");
+const chartscii = require("chartscii");
 
 const argv = yargs(hideBin(process.argv)).option("dirPath", {
   type: "string",
@@ -123,7 +123,7 @@ const chart = new chartscii(expenseData, {
   fill: "░",
   valueLabels: true,
   valueLabelsPrefix: "$",
-  valueLabelsDecimalPlaces: 2
+  valueLabelsFloatingPoint: 2
 });
 
 const reimbursementChart = new chartscii(reimbursementData, {
@@ -133,7 +133,7 @@ const reimbursementChart = new chartscii(reimbursementData, {
   fill: "░",
   valueLabels: true,
   valueLabelsPrefix: "$",
-  valueLabelsDecimalPlaces: 2
+  valueLabelsFloatingPoint: 2
 });
 
 console.log(chart.create());
