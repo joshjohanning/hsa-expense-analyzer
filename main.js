@@ -16,28 +16,37 @@ const dirPath = argv.dirPath;
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
   if (parts.length !== 3) {
-    console.error(`File does not match expected format: ${fileName}`);
-    return { year: null, amount: 0, isReimbursement: false };
+    return { year: null, amount: 0, isReimbursement: false, isValid: false };
   }
 
   const date = parts[0];
   const amountPart = parts[2];
-  let amount = 0;
-  if (amountPart && !isNaN(parseFloat(amountPart.substring(1)))) {
-    amount = parseFloat(amountPart.substring(1));
+  
+  // Validate date format (yyyy-mm-dd)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false };
   }
+  
+  let amount = 0;
+  if (amountPart && amountPart.startsWith('$') && !isNaN(parseFloat(amountPart.substring(1)))) {
+    amount = parseFloat(amountPart.substring(1));
+  } else {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+  }
+  
   const year = date.split("-")[0];
   
   // Check if this is a reimbursement
   const isReimbursement = fileName.includes('.reimbursed.');
   
-  return { year, amount, isReimbursement };
+  return { year, amount, isReimbursement, isValid: true };
 }
 
 function getTotalsByYear(dirPath) {
   const expensesByYear = {};
   const reimbursementsByYear = {};
   const receiptCounts = {};
+  const invalidFiles = [];
   const fileNames = fs.readdirSync(dirPath);
 
   fileNames.forEach((fileName) => {
@@ -45,7 +54,13 @@ function getTotalsByYear(dirPath) {
       return;
     }
 
-    const { year, amount, isReimbursement } = parseFileName(fileName);
+    const { year, amount, isReimbursement, isValid } = parseFileName(fileName);
+    
+    if (!isValid) {
+      invalidFiles.push(fileName);
+      return;
+    }
+    
     if (amount > 0) {
       // Initialize year data if not exists
       if (!expensesByYear[year]) {
@@ -66,10 +81,21 @@ function getTotalsByYear(dirPath) {
     }
   });
 
-  return { expensesByYear, reimbursementsByYear, receiptCounts };
+  return { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles };
 }
 
-const { expensesByYear, reimbursementsByYear, receiptCounts } = getTotalsByYear(dirPath);
+const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = getTotalsByYear(dirPath);
+
+// Display any invalid files
+if (invalidFiles.length > 0) {
+  console.log("\n⚠️  WARNING: The following files do not match the expected pattern:");
+  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
+  console.log("Files with issues:");
+  invalidFiles.forEach(file => {
+    console.log(`  - ${file}`);
+  });
+  console.log("\n");
+}
 
 const result = {};
 const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
