@@ -43,6 +43,12 @@ npm install
 npm run start -- --dirPath="/path/to/receipts"
 ```
 
+Can also run using sample data to test functionality:
+
+```bash
+npm run test
+```
+
 ## Example Output
 
 ```text
@@ -66,6 +72,10 @@ npm run start -- --dirPath="/path/to/receipts"
   expenses:       $125.00
   reimbursements: $0.00
   receipts:       1
+Total: 
+  expenses:       $600.00
+  reimbursements: $185.00
+  receipts:       9
 
 Expenses by year
 2021 ╢██████░░░░░░░░░░░░░░ $75.00
