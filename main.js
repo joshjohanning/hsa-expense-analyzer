@@ -100,13 +100,33 @@ if (invalidFiles.length > 0) {
 const result = {};
 const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 
+// Calculate totals
+let totalExpenses = 0;
+let totalReimbursements = 0;
+let totalReceipts = 0;
+
 for (const year of years) {
+  const yearExpenses = expensesByYear[year] || 0;
+  const yearReimbursements = reimbursementsByYear[year] || 0;
+  const yearReceipts = receiptCounts[year] || 0;
+  
+  totalExpenses += yearExpenses;
+  totalReimbursements += yearReimbursements;
+  totalReceipts += yearReceipts;
+  
   result[year] = {
-    expenses: `$${(expensesByYear[year] || 0).toFixed(2)}`,
-    reimbursements: `$${(reimbursementsByYear[year] || 0).toFixed(2)}`,
-    receipts: receiptCounts[year],
+    expenses: `$${yearExpenses.toFixed(2)}`,
+    reimbursements: `$${yearReimbursements.toFixed(2)}`,
+    receipts: yearReceipts,
   };
 }
+
+// Add totals row
+result['Total'] = {
+  expenses: `$${totalExpenses.toFixed(2)}`,
+  reimbursements: `$${totalReimbursements.toFixed(2)}`,
+  receipts: totalReceipts,
+};
 
 console.log(prettyjson.render(result));
 console.log();
