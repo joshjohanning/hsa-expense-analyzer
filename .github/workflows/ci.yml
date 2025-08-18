@@ -10,6 +10,9 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
     - name: Checkout repository
@@ -19,6 +22,23 @@ jobs:
 
     - name: Check version increment
       run: |
+        # Check if this is a PR and get the files changed
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "Checking files changed in PR..."
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          echo "Files changed: $CHANGED_FILES"
+          
+          # Check if any JS or package files were changed
+          JS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '\.(js|json)$' | grep -E '(\.js$|package.*\.json$)' || true)
+          
+          if [ -z "$JS_CHANGED" ]; then
+            echo "⏭️  No JavaScript or package files changed, skipping version check"
+            exit 0
+          fi
+          
+          echo "JavaScript or package files changed, proceeding with version check..."
+        fi
+        
         # Get the current version from package.json
         CURRENT_VERSION=$(grep -o '"version": "[^"]*"' package.json | cut -d'"' -f4)
         echo "Current version: $CURRENT_VERSION"
