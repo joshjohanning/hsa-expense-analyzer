@@ -80,8 +80,9 @@ jobs:
     - name: Run application
       run: npm run test | tee results.log
 
-    - name: Publish to job summary
+    - name: Strip ANSI codes and publish to job summary
       run: |
         echo '```' >> $GITHUB_STEP_SUMMARY
-        cat results.log >> $GITHUB_STEP_SUMMARY
+        # Strip ANSI escape sequences from the output
+        sed 's/\x1b\[[0-9;]*m//g' results.log >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
