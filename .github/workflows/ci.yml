@@ -21,6 +21,7 @@ jobs:
         fetch-depth: 0
 
     - name: Check version increment
+      if: github.event_name == 'pull_request'
       run: |
         # Check if this is a PR and get the files changed
         if [ "${{ github.event_name }}" = "pull_request" ]; then
