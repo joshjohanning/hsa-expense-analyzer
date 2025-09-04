@@ -7,16 +7,6 @@ const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
 const chartscii = require("chartscii");
 
-// ANSI color codes for better terminal output
-const colors = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-  dim: '\x1b[2m'
-};
-
 const argv = yargs(hideBin(process.argv))
   .scriptName("hsa-expense-analyzer-cli")
   .version(require('./package.json').version)
@@ -46,6 +36,16 @@ const dirPath = argv.dirPath;
 
 // Configuration constants
 const COLUMN_PADDING = 4; // Extra padding for table columns in file parsing display
+
+// ANSI color codes for better terminal output
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  dim: '\x1b[2m'
+};
 
 // Helper function for colored output  
 function colorize(text, color) {
