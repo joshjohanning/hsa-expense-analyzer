@@ -22,6 +22,8 @@ const argv = yargs(hideBin(process.argv))
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
   <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
   .help()
+  .alias('h', 'help')
+  .alias('v', 'version')
   .wrap(100)
   .argv;
 
