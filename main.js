@@ -34,7 +34,7 @@ const dirPath = path.resolve(argv.dirPath.replace(/^~/, require('os').homedir())
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
   if (parts.length !== 3) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File name should have format "yyyy-mm-dd - description - $amount.ext"` };
   }
 
   const date = parts[0];
@@ -42,14 +42,39 @@ function parseFileName(fileName) {
   
   // Validate date format (yyyy-mm-dd)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
   }
   
-  let amount = 0;
-  if (amountPart && amountPart.startsWith('$') && !isNaN(parseFloat(amountPart.substring(1)))) {
-    amount = parseFloat(amountPart.substring(1));
+  // Check if amount starts with $
+  if (!amountPart || !amountPart.startsWith('$')) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should start with $` };
+  }
+  
+  // Check if the filename has a proper file extension (ends with .ext pattern)
+  if (!/\.[a-zA-Z7]{2,5}$/.test(amountPart)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File is missing extension (should end with .pdf, .jpg, etc.)` };
+  }
+  
+  // Parse the amount - be more strict about format
+  let amountStr = amountPart.substring(1); // Remove the $
+  
+  // Handle .reimbursed. files - remove .reimbursed.ext pattern
+  if (amountStr.includes('.reimbursed.')) {
+    amountStr = amountStr.replace(/\.reimbursed\..+$/, '');
   } else {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    // Remove regular file extension (.pdf, .jpg, etc.)
+    amountStr = amountStr.replace(/\.[^.]+$/, '');
+  }
+  
+  // Check for valid decimal number format (digits with optional .digits, no commas)
+  if (!/^\d+\.\d{2}$/.test(amountStr)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid format like $50.00` };
+  }
+  
+  let amount = parseFloat(amountStr);
+  
+  if (isNaN(amount)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid number` };
   }
   
   const year = date.split("-")[0];
@@ -80,10 +105,10 @@ function getTotalsByYear(dirPath) {
       return;
     }
 
-    const { year, amount, isReimbursement, isValid } = parseFileName(fileName);
+    const { year, amount, isReimbursement, isValid, error } = parseFileName(fileName);
     
     if (!isValid) {
-      invalidFiles.push(fileName);
+      invalidFiles.push({ fileName, error });
       return;
     }
     
@@ -122,13 +147,14 @@ if (years.length === 0) {
 
 // Display any invalid files
 if (invalidFiles.length > 0) {
-  console.log("\n⚠️  WARNING: The following files do not match the expected pattern:");
+  console.log("⚠️  WARNING: The following files do not match the expected pattern:");
   console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
-  console.log("Files with issues:");
-  invalidFiles.forEach(file => {
-    console.log(`  - ${file}`);
+  console.log("\nFilename".padEnd(65) + " Error");
+  console.log("--------".padEnd(65) + "-----");
+  invalidFiles.forEach(({ fileName, error }) => {
+    console.log(fileName.padEnd(65) + error);
   });
-  console.log("\n");
+  console.log();
 }
 
 const result = {};
