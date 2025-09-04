@@ -1,8 +1,13 @@
 # hsa-expense-analyzer-cli
 
+[![ci workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/hsa-expense-analyzer-cli/ci.yml?logo=github&label=ci%20workflow&color=brightgreen&labelColor=333)][ci]
+[![publish workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/hsa-expense-analyzer-cli/publish.yml?logo=github&label=publish%20workflow&color=brightgreen&labelColor=333)][publish]
+[![npm version](https://img.shields.io/npm/v/%40joshjohanning%2Fhsa-expense-analyzer-cli?logo=npm&labelColor=333)][npm]
+[![stars](https://img.shields.io/github/stars/joshjohanning/hsa-expense-analyzer-cli?style=flat&logo=github&color=yellow&label=stars%20★&labelColor=333)][stars]
+
 🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
-<img src="https://github.com/user-attachments/assets/79f5b9b3-2e29-47f6-9043-481eff429266" alt="hsa-expense-analyzer sample output" width="75%">
+![hsa-expense-analyzer-cli sample output](https://josh-ops.com/assets/screenshots/2025-09-04-hsa-expense-analyzer/hsa-expense-analyzer.png)
 
 ## File Structure
 
@@ -38,12 +43,25 @@ Example file structure:
 
 ## Running
 
+### Install from npm
+
+The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli) and run it:
+
+```bash
+npm install -g @joshjohanning/hsa-expense-analyzer-cli
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
+```
+
+### Local Development
+
+Or if you want to clone locally and hack on the code:
+
 ```bash
 npm install
 npm run start -- --dirPath="/path/to/receipts"
 ```
 
-Can also run using sample data to test functionality:
+You can also run locally using sample data to test the functionality:
 
 ```bash
 npm run test
@@ -106,3 +124,19 @@ Expenses vs Reimbursements by year
 2025 Reimbursements ╢░░░░░░░░░░░░░░░░░░░░ $0.00
                     ╚════════════════════
 ```
+
+If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output:
+
+```text
+⚠️  WARNING: The following files do not match the expected pattern:
+Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>
+Files with issues:
+  - 2021-01-15- doctor - 50.00.pdf
+  - 2021-01-15-wrong-format-missing-dashes.pdf
+  - wrong-format.pdf
+```
+
+[ci]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/ci.yml
+[publish]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/publish.yml
+[npm]: https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli
+[stars]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/stargazers
