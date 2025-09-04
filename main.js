@@ -2,7 +2,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
 const prettyjson = require("prettyjson");
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
@@ -28,8 +27,7 @@ const argv = yargs(hideBin(process.argv))
   .wrap(100)
   .argv;
 
-// support ~ for home directory
-const dirPath = path.resolve(argv.dirPath.replace(/^~/, require('os').homedir()));
+const dirPath = argv.dirPath;
 
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
