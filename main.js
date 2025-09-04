@@ -7,6 +7,16 @@ const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
 const chartscii = require("chartscii");
 
+// ANSI color codes for better terminal output
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  dim: '\x1b[2m'
+};
+
 const argv = yargs(hideBin(process.argv))
   .scriptName("hsa-expense-analyzer-cli")
   .version(require('./package.json').version)
@@ -18,6 +28,11 @@ const argv = yargs(hideBin(process.argv))
     demandOption: true,
     describe: "The directory path containing receipt files",
   })
+  .option("no-color", {
+    type: "boolean",
+    default: false,
+    describe: "Disable colored output"
+  })
   .epilogue(`Expected file format:
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
   <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
@@ -28,6 +43,15 @@ const argv = yargs(hideBin(process.argv))
   .argv;
 
 const dirPath = argv.dirPath;
+
+// Configuration constants
+const COLUMN_PADDING = 4; // Extra padding for table columns in file parsing display
+
+// Helper function for colored output  
+function colorize(text, color) {
+  if (process.argv.includes('--no-color')) return text;
+  return `${colors[color]}${text}${colors.reset}`;
+}
 
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
@@ -100,8 +124,8 @@ function getTotalsByYear(dirPath) {
   try {
     fileNames = fs.readdirSync(dirPath);
   } catch (error) {
-    console.error(`❌ Error: Cannot access directory`);
-    console.error(`   ${error.message}`);
+    console.error(colorize(`❌ Error: Cannot access directory`, 'red'));
+    console.error(colorize(`   ${error.message}`, 'dim'));
     process.exit(1);
   }
 
@@ -145,19 +169,25 @@ const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = ge
 // Check if no valid files were found
 const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 if (years.length === 0) {
-  console.log("❌ Error: No valid receipt files found in the specified directory");
-  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
+  console.log(colorize("❌ Error: No valid receipt files found in the specified directory", 'red'));
+  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
   process.exit(1);
 }
 
 // Display any invalid files
 if (invalidFiles.length > 0) {
-  console.log("⚠️  WARNING: The following files do not match the expected pattern:");
-  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
-  console.log("\nFilename".padEnd(65) + " Error");
-  console.log("--------".padEnd(65) + "-----");
+  // Calculate dynamic padding based on longest filename + buffer
+  const maxFileNameLength = Math.max(...invalidFiles.map(f => f.fileName.length));
+  // Subtract padding for no-color (compact), add padding for color (spacing)
+  const extraPadding = process.argv.includes('--no-color') ? -COLUMN_PADDING-1 : COLUMN_PADDING;
+  const padding = Math.max(maxFileNameLength + extraPadding, 'Filename'.length + extraPadding);
+  
+  console.log(colorize("⚠️  WARNING: The following files do not match the expected pattern", 'yellow'));
+  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
+  console.log(`\n${colorize('Filename', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('Error', 'cyan')}`);
+  console.log(`${colorize('--------', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('-----', 'cyan')}`);
   invalidFiles.forEach(({ fileName, error }) => {
-    console.log(fileName.padEnd(65) + error);
+    console.log(`${colorize(fileName, 'yellow').padEnd(padding + colors.yellow.length + colors.reset.length)}${colorize(error, 'red')}`);
   });
   console.log();
 }
@@ -272,3 +302,41 @@ for (const year of years) {
   console.log(`${year} Reimbursements ╢${reimbursementBar} $${reimbursementAmount.toFixed(2)}`);}
 
 console.log("                    ╚════════════════════");
+console.log();
+
+// Summary statistics
+console.log("📊 Summary Statistics");
+console.log("━".repeat(50));
+
+const totalValidFiles = Object.values(receiptCounts).reduce((sum, count) => sum + count, 0);
+const totalInvalidFiles = invalidFiles.length;
+const totalFiles = totalValidFiles + totalInvalidFiles;
+const invalidFilePercentage = totalFiles > 0 ? ((totalInvalidFiles / totalFiles) * 100).toFixed(1) : 0;
+const avgExpensePerYear = years.length > 0 ? (totalExpenses / years.length).toFixed(2) : 0;
+const avgReceiptsPerYear = years.length > 0 ? Math.round(totalValidFiles / years.length) : 0;
+const reimbursementRate = totalExpenses > 0 ? ((totalReimbursements / totalExpenses) * 100).toFixed(1) : 0;
+const totalReimburseable = totalExpenses - totalReimbursements; // Money you could still get reimbursed
+const reimburseableRate = totalExpenses > 0 ? ((totalReimburseable / totalExpenses) * 100).toFixed(1) : 0;
+
+console.log(`${colorize('Total Receipts Processed:', 'cyan')} ${totalFiles}`);
+if (totalInvalidFiles > 0) {
+  console.log(`${colorize('Invalid Receipts:', 'yellow')} ${totalInvalidFiles} (${invalidFilePercentage}%)`);
+}
+console.log(`${colorize('Years Covered:', 'cyan')} ${years.length} (${years[0]} - ${years[years.length - 1]})`);
+console.log(`${colorize('Total Expenses:', 'cyan')} $${totalExpenses.toFixed(2)}`);
+console.log(`${colorize('Total Reimbursements:', 'cyan')} $${totalReimbursements.toFixed(2)} (${reimbursementRate}%)`);
+console.log(`${colorize('Total Reimburseable:', 'green')} $${totalReimburseable.toFixed(2)} (${reimburseableRate}%)`);
+console.log(`${colorize('Average Expenses/Year:', 'cyan')} $${avgExpensePerYear}`);
+console.log(`${colorize('Average Receipts/Year:', 'cyan')} ${avgReceiptsPerYear}`);
+
+// Find the most expensive year
+if (years.length > 0) {
+  const mostExpensiveYear = years.reduce((maxYear, year) => 
+    (expensesByYear[year] || 0) > (expensesByYear[maxYear] || 0) ? year : maxYear
+  );
+  const mostExpensiveYearReceipts = receiptCounts[mostExpensiveYear] || 0;
+  const mostExpensiveYearAmount = expensesByYear[mostExpensiveYear] || 0;
+  const expensePercentage = totalExpenses > 0 ? ((mostExpensiveYearAmount / totalExpenses) * 100).toFixed(1) : 0;
+  const receiptPercentage = totalValidFiles > 0 ? ((mostExpensiveYearReceipts / totalValidFiles) * 100).toFixed(1) : 0;
+  console.log(`${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`);
+}

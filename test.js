@@ -13,7 +13,7 @@ console.log('Running hsa-expense-analyzer-cli tests...\n');
 
 try {
   // Run the main script on test-data directory and capture output
-  const output = execSync('node main.js --dirPath=test-data/', { 
+  const output = execSync('node main.js --dirPath=test-data/ --no-color', { 
     encoding: 'utf8',
     cwd: __dirname 
   });
@@ -40,7 +40,7 @@ try {
     // Strip ANSI color codes for easier parsing
     const cleanLine = line.replace(/\x1b\[[0-9;]*m/g, '');
     
-    if (cleanLine.includes('⚠️  WARNING: The following files do not match the expected pattern:')) {
+    if (cleanLine.includes('⚠️  WARNING: The following files do not match the expected pattern')) {
       inErrorSection = true;
       continue;
     }
@@ -65,6 +65,7 @@ try {
   
   // Test validation at the end
   console.log('='.repeat(80));
+  console.log();
   console.log('TEST VALIDATION:');
   
   let testsPassed = 0;
