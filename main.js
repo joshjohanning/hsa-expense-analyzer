@@ -7,6 +7,16 @@ const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
 const chartscii = require("chartscii");
 
+// ANSI color codes for better terminal output
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  dim: '\x1b[2m'
+};
+
 const argv = yargs(hideBin(process.argv))
   .scriptName("hsa-expense-analyzer-cli")
   .version(require('./package.json').version)
@@ -18,6 +28,11 @@ const argv = yargs(hideBin(process.argv))
     demandOption: true,
     describe: "The directory path containing receipt files",
   })
+  .option("no-color", {
+    type: "boolean",
+    default: false,
+    describe: "Disable colored output"
+  })
   .epilogue(`Expected file format:
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
   <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
@@ -28,6 +43,15 @@ const argv = yargs(hideBin(process.argv))
   .argv;
 
 const dirPath = argv.dirPath;
+
+// Configuration constants
+const COLUMN_PADDING = 4; // Extra padding for table columns in file parsing display
+
+// Helper function for colored output  
+function colorize(text, color) {
+  if (process.argv.includes('--no-color')) return text;
+  return `${colors[color]}${text}${colors.reset}`;
+}
 
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
@@ -100,8 +124,8 @@ function getTotalsByYear(dirPath) {
   try {
     fileNames = fs.readdirSync(dirPath);
   } catch (error) {
-    console.error(`❌ Error: Cannot access directory`);
-    console.error(`   ${error.message}`);
+    console.error(colorize(`❌ Error: Cannot access directory`, 'red'));
+    console.error(colorize(`   ${error.message}`, 'dim'));
     process.exit(1);
   }
 
@@ -145,8 +169,8 @@ const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = ge
 // Check if no valid files were found
 const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 if (years.length === 0) {
-  console.log("❌ Error: No valid receipt files found in the specified directory");
-  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
+  console.log(colorize("❌ Error: No valid receipt files found in the specified directory", 'red'));
+  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
   process.exit(1);
 }
 
@@ -154,15 +178,16 @@ if (years.length === 0) {
 if (invalidFiles.length > 0) {
   // Calculate dynamic padding based on longest filename + buffer
   const maxFileNameLength = Math.max(...invalidFiles.map(f => f.fileName.length));
-  const paddingAmount = 4;
-  const padding = Math.max(maxFileNameLength + paddingAmount, 'Filename'.length + paddingAmount);
+  // Subtract padding for no-color (compact), add padding for color (spacing)
+  const extraPadding = process.argv.includes('--no-color') ? -COLUMN_PADDING-1 : COLUMN_PADDING;
+  const padding = Math.max(maxFileNameLength + extraPadding, 'Filename'.length + extraPadding);
   
-  console.log("⚠️  WARNING: The following files do not match the expected pattern:");
-  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
-  console.log("\nFilename".padEnd(padding) + " Error");
-  console.log("--------".padEnd(padding) + "-----");
+  console.log(colorize("⚠️  WARNING: The following files do not match the expected pattern", 'yellow'));
+  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
+  console.log(`\n${colorize('Filename', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('Error', 'cyan')}`);
+  console.log(`${colorize('--------', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('-----', 'cyan')}`);
   invalidFiles.forEach(({ fileName, error }) => {
-    console.log(fileName.padEnd(padding) + error);
+    console.log(`${colorize(fileName, 'yellow').padEnd(padding + colors.yellow.length + colors.reset.length)}${colorize(error, 'red')}`);
   });
   console.log();
 }
