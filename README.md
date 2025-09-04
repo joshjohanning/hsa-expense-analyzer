@@ -1,6 +1,6 @@
-# hsa-expense-analyzer
+# hsa-expense-analyzer-cli
 
-🩺 🧾 📊 Analyzes HSA expense totals by year from a folder of receipts.
+🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
 <img src="https://github.com/user-attachments/assets/79f5b9b3-2e29-47f6-9043-481eff429266" alt="hsa-expense-analyzer sample output" width="75%">
 
@@ -93,7 +93,7 @@ Reimbursements by year
 2025 ╢░░░░░░░░░░░░░░░░░░░░ $0.00
      ╚════════════════════
 
-Comparison by year:
+Expenses vs Reimbursements by year
 2021 Expenses       ╢██████░░░░░░░░░░░░░░ $75.00
 2021 Reimbursements ╢██░░░░░░░░░░░░░░░░░░ $30.00
 2022 Expenses       ╢████████████████████ $250.00

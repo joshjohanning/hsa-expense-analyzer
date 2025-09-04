@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const path = require("path");
 const prettyjson = require("prettyjson");
@@ -188,7 +190,7 @@ console.log(reimbursementChart.create());
 console.log();
 
 // Create a manual comparison chart
-console.log("Comparison by year:");
+console.log("Expenses vs Reimbursements by year");
 const maxValue = Math.max(
   ...Object.values(expensesByYear),
   ...Object.values(reimbursementsByYear)
