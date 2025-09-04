@@ -2,7 +2,7 @@
 
 🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
-<img src="https://github.com/user-attachments/assets/79f5b9b3-2e29-47f6-9043-481eff429266" alt="hsa-expense-analyzer sample output" width="75%">
+![hsa-expense-analyzer-cli sample output](https://josh-ops.com/assets/screenshots/2025-09-04-hsa-expense-analyzer/hsa-expense-analyzer.png)
 
 ## File Structure
 
