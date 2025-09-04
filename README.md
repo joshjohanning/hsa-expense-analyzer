@@ -9,6 +9,73 @@
 
 ![hsa-expense-analyzer-cli sample output](https://josh-ops.com/assets/screenshots/2025-09-04-hsa-expense-analyzer/hsa-expense-analyzer.png)
 
+## Installation
+
+The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli):
+
+```bash
+npm install -g @joshjohanning/hsa-expense-analyzer-cli
+```
+
+## Usage
+
+```text
+$ hsa-expense-analyzer-cli --help
+A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊
+
+Usage: hsa-expense-analyzer-cli --dirPath <path>
+
+Options:
+  -d, --dirPath       The directory path containing receipt files                [string] [required]
+      --no-color      Disable colored output                              [boolean] [default: false]
+      --summary-only  Show only summary statistics and hide year by year tables and charts
+                                                                          [boolean] [default: false]
+  -h, --help          Show help                                                            [boolean]
+  -v, --version       Show version number                                                  [boolean]
+
+Expected file format:
+  <yyyy-mm-dd> - <description> - $<amount>.<ext>
+  <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>
+```
+
+### Usage Examples
+
+```bash
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
+
+# Show only summary statistics (no tables or charts)
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --summary-only
+
+# Disable colored output for plain text
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --no-color
+```
+
+## Local Development
+
+If you want to clone the repository locally and run from source:
+
+```bash
+git clone https://github.com/joshjohanning/hsa-expense-analyzer-cli.git
+cd hsa-expense-analyzer-cli
+npm install
+```
+
+Then run with:
+
+```bash
+npm run start -- --dirPath="/path/to/receipts"
+
+# Or with options
+npm run start -- --dirPath="/path/to/receipts" --summary-only
+npm run start -- --dirPath="/path/to/receipts" --no-color
+```
+
+Test with sample data:
+
+```bash
+npm run test
+```
+
 ## File Structure
 
 Expects receipts to be in single folder with the following naming convention:
@@ -43,32 +110,6 @@ Example file structure:
 > - The amount must start with a `$` and be in format `$XX.XX` (e.g., $50.00, not $50,00 or $50)
 > - Any common file extension for receipts is fine (`.pdf`, `.jpg`, `.heic`, etc.); only the date and $ amount are used for calculations
 > - The tool detects reimbursements by looking for `.reimbursed.` anywhere in the filename
-
-## Running
-
-### Install from npm
-
-The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli) and run it:
-
-```bash
-npm install -g @joshjohanning/hsa-expense-analyzer-cli
-hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
-```
-
-### Local Development
-
-Or if you want to clone locally and hack on the code:
-
-```bash
-npm install
-npm run start -- --dirPath="/path/to/receipts"
-```
-
-You can also run locally using sample data to test the functionality:
-
-```bash
-npm run test
-```
 
 ## Example Output
 
