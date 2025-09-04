@@ -1,4 +1,4 @@
-name: Install and Run Application
+name: Run tests
 
 on:
   push:
