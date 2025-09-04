@@ -126,6 +126,18 @@ Expenses vs Reimbursements by year
 2025 Expenses       ╢██████████░░░░░░░░░░ $125.00
 2025 Reimbursements ╢░░░░░░░░░░░░░░░░░░░░ $0.00
                     ╚════════════════════
+
+📊 Summary Statistics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Receipts Processed: 25
+Invalid Receipts: 16 (64.0%)
+Years Covered: 5 (2021 - 2025)
+Total Expenses: $600.00
+Total Reimbursements: $185.00 (30.8%)
+Total Reimburseable: $415.00 (69.2%)
+Average Expenses/Year: $120.00
+Average Receipts/Year: 2
+Most Expensive Year: 2022 ($250.00 [41.7%], 3 receipts [33.3%])
 ```
 
 If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output:
