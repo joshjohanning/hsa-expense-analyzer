@@ -7,11 +7,23 @@ const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
 const chartscii = require("chartscii");
 
-const argv = yargs(hideBin(process.argv)).option("dirPath", {
-  type: "string",
-  demandOption: true,
-  describe: "The directory path",
-}).argv;
+const argv = yargs(hideBin(process.argv))
+  .scriptName("hsa-expense-analyzer-cli")
+  .version(require('./package.json').version)
+  .usage("A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊\n")
+  .usage("Usage: $0 --dirPath <path>")
+  .option("dirPath", {
+    alias: "d", 
+    type: "string",
+    demandOption: true,
+    describe: "The directory path containing receipt files",
+  })
+  .epilogue(`Expected file format:
+  <yyyy-mm-dd> - <description> - $<amount>.<ext>
+  <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
+  .help()
+  .wrap(100)
+  .argv;
 
 const dirPath = argv.dirPath;
 
