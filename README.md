@@ -14,9 +14,9 @@
 Expects receipts to be in single folder with the following naming convention:
 
 - Expenses:
-`<yyyy-mm-dd> - <description> - $<total>.pdf|png|jpg|whatever`
+`<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
 - Reimbursed expenses:
-`<yyyy-mm-dd> - <description> - $<total>.reimbursed.pdf|png|jpg|whatever`
+`<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
 
 > [!TIP]
 > When you receive a reimbursement from your HSA provider, rename the receipt to include `.reimbursed.` before the extension. This will help track which expenses have been reimbursed and which expenses can still be submitted.
@@ -38,8 +38,11 @@ Example file structure:
 
 > [!NOTE]
 >
-> - Any file extension for receipts is fine; only the date and $ amount are used
-> - The script detects reimbursements by looking for `.reimbursed.` anywhere in the filename.
+> - The tool is expecting the date to be in `yyyy-mm-dd` format and be a valid date
+> - The `" - "` dashes after the date before the amount must have spaces around them
+> - The amount must start with a `$` and be in format `$XX.XX` (e.g., $50.00, not $50,00 or $50)
+> - Any common file extension for receipts is fine (`.pdf`, `.jpg`, `.heic`, etc.); only the date and $ amount are used for calculations
+> - The tool detects reimbursements by looking for `.reimbursed.` anywhere in the filename
 
 ## Running
 
