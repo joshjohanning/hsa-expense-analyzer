@@ -63,7 +63,15 @@ function getTotalsByYear(dirPath) {
   const reimbursementsByYear = {};
   const receiptCounts = {};
   const invalidFiles = [];
-  const fileNames = fs.readdirSync(dirPath);
+  
+  let fileNames;
+  try {
+    fileNames = fs.readdirSync(dirPath);
+  } catch (error) {
+    console.error(`❌ Error: Cannot access directory`);
+    console.error(`   ${error.message}`);
+    process.exit(1);
+  }
 
   fileNames.forEach((fileName) => {
     if (fileName.startsWith(".")) {
