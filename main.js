@@ -43,6 +43,13 @@ function parseFileName(fileName) {
     return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
   }
   
+  // Validate that it's actually a valid date
+  const dateObj = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
+  const [yearNum, monthNum, dayNum] = date.split('-').map(Number);
+  if (dateObj.getFullYear() !== yearNum || dateObj.getMonth() !== monthNum - 1 || dateObj.getDate() !== dayNum) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
+  }
+  
   // Check if amount starts with $
   if (!amountPart || !amountPart.startsWith('$')) {
     return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should start with $` };
