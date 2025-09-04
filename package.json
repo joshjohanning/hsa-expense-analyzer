@@ -43,7 +43,7 @@
   },
   "scripts": {
     "start": "node main.js",
-    "test": "node main.js --dirPath=./test-data"
+    "test": "node test.js"
   },
   "dependencies": {
     "chartscii": "^3.2.0",
