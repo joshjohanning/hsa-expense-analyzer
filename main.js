@@ -152,12 +152,16 @@ if (years.length === 0) {
 
 // Display any invalid files
 if (invalidFiles.length > 0) {
+  // Calculate dynamic padding based on longest filename + buffer
+  const maxFileNameLength = Math.max(...invalidFiles.map(f => f.fileName.length));
+  const padding = Math.max(maxFileNameLength + 4, 'Filename'.length + 4); // At least header width + buffer
+  
   console.log("⚠️  WARNING: The following files do not match the expected pattern:");
   console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
-  console.log("\nFilename".padEnd(65) + " Error");
-  console.log("--------".padEnd(65) + "-----");
+  console.log("\nFilename".padEnd(padding) + " Error");
+  console.log("--------".padEnd(padding) + "-----");
   invalidFiles.forEach(({ fileName, error }) => {
-    console.log(fileName.padEnd(65) + error);
+    console.log(fileName.padEnd(padding) + error);
   });
   console.log();
 }

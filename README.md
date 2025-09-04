@@ -134,17 +134,17 @@ If you have files that don't match the expected naming pattern, you'll see a war
 ⚠️  WARNING: The following files do not match the expected pattern:
 Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>
 
-Filename                                                         Error
---------                                                         -----
-2021-01-10 - doctor-incorrect-amount - $50,00.pdf                Amount "$50,00.pdf" should be a valid format like $50.00
-2021-01-10 - doctor-incorrect-amount - $50.pdf                   Amount "$50.pdf" should be a valid format like $50.00
-2021-01-15 - doctor-missing-dollar-sign - 50.00.pdf              Amount "50.00.pdf" should start with $
-2021-01-25 - doctor-no-extension - $50.00                        File is missing extension (should end with .pdf, .jpg, etc.)
-2021-01-30 - doctor-missing-amount.pdf                                  File name should have format "yyyy-mm-dd - description - $amount.ext"
-2021-01-30- doctor-missing-space-after-dash - $50.00.pdf         File name should have format "yyyy-mm-dd - description - $amount.ext"
-2021-1-25 - doctor-wrong-date-format - $50.00.pdf                Date "2021-1-25" should be yyyy-mm-dd format
-2021-25-01 - doctor-wrong-date-format - $50.00.pdf               Date "2021-25-01" should be yyyy-mm-dd format
-doctor-missing-date - $120.00.pdf                                File name should have format "yyyy-mm-dd - description - $amount.ext"
+Filename                                                     Error
+--------                                                     -----
+2021-01-10 - doctor-incorrect-amount - $50,00.pdf            Amount "$50,00.pdf" should be a valid format like $50.00
+2021-01-10 - doctor-incorrect-amount - $50.pdf               Amount "$50.pdf" should be a valid format like $50.00
+2021-01-15 - doctor-missing-dollar-sign - 50.00.pdf          Amount "50.00.pdf" should start with $
+2021-01-25 - doctor-no-extension - $50.00                    File is missing extension (should end with .pdf, .jpg, etc.)
+2021-01-30 - doctor-missing-amount.pdf                       File name should have format "yyyy-mm-dd - description - $amount.ext"
+2021-01-30- doctor-missing-space-before-dash - $50.00.pdf    File name should have format "yyyy-mm-dd - description - $amount.ext"
+2021-1-25 - doctor-wrong-date-format - $50.00.pdf            Date "2021-1-25" should be yyyy-mm-dd format
+2021-25-01 - doctor-wrong-date-format - $50.00.pdf           Date "2021-25-01" should be yyyy-mm-dd format
+doctor-missing-date - $120.00.pdf                            File name should have format "yyyy-mm-dd - description - $amount.ext"
 ```
 
 [ci]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/ci.yml
