@@ -154,7 +154,8 @@ if (years.length === 0) {
 if (invalidFiles.length > 0) {
   // Calculate dynamic padding based on longest filename + buffer
   const maxFileNameLength = Math.max(...invalidFiles.map(f => f.fileName.length));
-  const padding = Math.max(maxFileNameLength + 4, 'Filename'.length + 4); // At least header width + buffer
+  const paddingAmount = 4;
+  const padding = Math.max(maxFileNameLength + paddingAmount, 'Filename'.length + paddingAmount);
   
   console.log("⚠️  WARNING: The following files do not match the expected pattern:");
   console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
