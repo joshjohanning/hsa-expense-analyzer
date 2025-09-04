@@ -112,6 +112,14 @@ function getTotalsByYear(dirPath) {
 
 const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = getTotalsByYear(dirPath);
 
+// Check if no valid files were found
+const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
+if (years.length === 0) {
+  console.log("❌ Error: No valid receipt files found in the specified directory");
+  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
+  process.exit(1);
+}
+
 // Display any invalid files
 if (invalidFiles.length > 0) {
   console.log("\n⚠️  WARNING: The following files do not match the expected pattern:");
@@ -124,7 +132,6 @@ if (invalidFiles.length > 0) {
 }
 
 const result = {};
-const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 
 // Calculate totals
 let totalExpenses = 0;
