@@ -65,6 +65,7 @@ try {
   
   // Test validation at the end
   console.log('='.repeat(80));
+  console.log();
   console.log('TEST VALIDATION:');
   
   let testsPassed = 0;
