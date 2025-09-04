@@ -170,8 +170,7 @@ Expenses vs Reimbursements by year
 
 📊 Summary Statistics
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Receipts Processed: 25
-Invalid Receipts: 16 (64.0%)
+Total Receipts Processed: 9
 Years Covered: 5 (2021 - 2025)
 Total Expenses: $600.00
 Total Reimbursements: $185.00 (30.8%)
