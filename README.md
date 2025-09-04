@@ -43,12 +43,25 @@ Example file structure:
 
 ## Running
 
+### Install from npm
+
+The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli) and run it:
+
+```bash
+npm install -g @joshjohanning/hsa-expense-analyzer-cli
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
+```
+
+### Local Development
+
+Or if you want to clone locally and hack on the code:
+
 ```bash
 npm install
 npm run start -- --dirPath="/path/to/receipts"
 ```
 
-Can also run using sample data to test functionality:
+You can also run locally using sample data to test the functionality:
 
 ```bash
 npm run test
