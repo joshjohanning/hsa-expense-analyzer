@@ -125,6 +125,17 @@ Expenses vs Reimbursements by year
                     ╚════════════════════
 ```
 
+If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output:
+
+```text
+⚠️  WARNING: The following files do not match the expected pattern:
+Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>
+Files with issues:
+  - 2021-01-15- doctor - 50.00.pdf
+  - 2021-01-15-wrong-format-missing-dashes.pdf
+  - wrong-format.pdf
+```
+
 [ci]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/ci.yml
 [publish]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/publish.yml
 [npm]: https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli
