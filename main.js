@@ -302,3 +302,41 @@ for (const year of years) {
   console.log(`${year} Reimbursements ╢${reimbursementBar} $${reimbursementAmount.toFixed(2)}`);}
 
 console.log("                    ╚════════════════════");
+console.log();
+
+// Summary statistics
+console.log("📊 Summary Statistics");
+console.log("━".repeat(50));
+
+const totalValidFiles = Object.values(receiptCounts).reduce((sum, count) => sum + count, 0);
+const totalInvalidFiles = invalidFiles.length;
+const totalFiles = totalValidFiles + totalInvalidFiles;
+const invalidFilePercentage = totalFiles > 0 ? ((totalInvalidFiles / totalFiles) * 100).toFixed(1) : 0;
+const avgExpensePerYear = years.length > 0 ? (totalExpenses / years.length).toFixed(2) : 0;
+const avgReceiptsPerYear = years.length > 0 ? Math.round(totalValidFiles / years.length) : 0;
+const reimbursementRate = totalExpenses > 0 ? ((totalReimbursements / totalExpenses) * 100).toFixed(1) : 0;
+const totalReimburseable = totalExpenses - totalReimbursements; // Money you could still get reimbursed
+const reimburseableRate = totalExpenses > 0 ? ((totalReimburseable / totalExpenses) * 100).toFixed(1) : 0;
+
+console.log(`${colorize('Total Receipts Processed:', 'cyan')} ${totalFiles}`);
+if (totalInvalidFiles > 0) {
+  console.log(`${colorize('Invalid Receipts:', 'yellow')} ${totalInvalidFiles} (${invalidFilePercentage}%)`);
+}
+console.log(`${colorize('Years Covered:', 'cyan')} ${years.length} (${years[0]} - ${years[years.length - 1]})`);
+console.log(`${colorize('Total Expenses:', 'cyan')} $${totalExpenses.toFixed(2)}`);
+console.log(`${colorize('Total Reimbursements:', 'cyan')} $${totalReimbursements.toFixed(2)} (${reimbursementRate}%)`);
+console.log(`${colorize('Total Reimburseable:', 'green')} $${totalReimburseable.toFixed(2)} (${reimburseableRate}%)`);
+console.log(`${colorize('Average Expenses/Year:', 'cyan')} $${avgExpensePerYear}`);
+console.log(`${colorize('Average Receipts/Year:', 'cyan')} ${avgReceiptsPerYear}`);
+
+// Find the most expensive year
+if (years.length > 0) {
+  const mostExpensiveYear = years.reduce((maxYear, year) => 
+    (expensesByYear[year] || 0) > (expensesByYear[maxYear] || 0) ? year : maxYear
+  );
+  const mostExpensiveYearReceipts = receiptCounts[mostExpensiveYear] || 0;
+  const mostExpensiveYearAmount = expensesByYear[mostExpensiveYear] || 0;
+  const expensePercentage = totalExpenses > 0 ? ((mostExpensiveYearAmount / totalExpenses) * 100).toFixed(1) : 0;
+  const receiptPercentage = totalValidFiles > 0 ? ((mostExpensiveYearReceipts / totalValidFiles) * 100).toFixed(1) : 0;
+  console.log(`${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`);
+}
