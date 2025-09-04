@@ -23,6 +23,11 @@ const argv = yargs(hideBin(process.argv))
     default: false,
     describe: "Disable colored output"
   })
+  .option("summary-only", {
+    type: "boolean",
+    default: false,
+    describe: "Show only summary statistics"
+  })
   .epilogue(`Expected file format:
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
   <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
@@ -222,13 +227,15 @@ result['Total'] = {
   receipts: totalReceipts,
 };
 
-console.log(prettyjson.render(result));
-console.log();
+// Show data table and charts unless summary-only mode
+if (!argv['summary-only']) {
+  console.log(prettyjson.render(result));
+  console.log();
 
-// Create data arrays for charts
-const expenseData = [];
-const reimbursementData = [];
-const combinedData = [];
+  // Create data arrays for charts
+  const expenseData = [];
+  const reimbursementData = [];
+  const combinedData = [];
 
 for (const year of years) {
   const expenseAmount = expensesByYear[year] || 0;
@@ -303,6 +310,7 @@ for (const year of years) {
 
 console.log("                    ╚════════════════════");
 console.log();
+}
 
 // Summary statistics
 console.log("📊 Summary Statistics");
