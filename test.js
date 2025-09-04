@@ -3,6 +3,12 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
+// Expected test results - update these if test data changes
+const EXPECTED_INVALID_FILES = 16;
+const EXPECTED_TOTAL_EXPENSES = '600.00';
+const EXPECTED_TOTAL_REIMBURSEMENTS = '185.00';
+const EXPECTED_TOTAL_RECEIPTS = '9';
+
 console.log('Running hsa-expense-analyzer-cli tests...\n');
 
 try {
@@ -25,9 +31,9 @@ try {
   const outputText = output.replace(/\x1b\[[0-9;]*m/g, ''); // Strip ANSI codes
   
   // Look for the exact expected totals in the cleaned output
-  const totalExpenses = outputText.includes('expenses:       $600.00') ? '600.00' : null;
-  const totalReimbursements = outputText.includes('reimbursements: $185.00') ? '185.00' : null;
-  const totalReceipts = outputText.includes('receipts:       9') ? '9' : null;
+  const totalExpenses = outputText.includes(`expenses:       $${EXPECTED_TOTAL_EXPENSES}`) ? EXPECTED_TOTAL_EXPENSES : null;
+  const totalReimbursements = outputText.includes(`reimbursements: $${EXPECTED_TOTAL_REIMBURSEMENTS}`) ? EXPECTED_TOTAL_REIMBURSEMENTS : null;
+  const totalReceipts = outputText.includes(`receipts:       ${EXPECTED_TOTAL_RECEIPTS}`) ? EXPECTED_TOTAL_RECEIPTS : null;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -65,35 +71,35 @@ try {
   let testsTotal = 4;
   
   // Check invalid file count
-  if (errorCount === 15) {
-    console.log(`✅ Found exactly 15 invalid files as expected`);
+  if (errorCount === EXPECTED_INVALID_FILES) {
+    console.log(`✅ Found exactly ${EXPECTED_INVALID_FILES} invalid files as expected`);
     testsPassed++;
   } else {
-    console.log(`❌ Expected 15 invalid files, but found ${errorCount}`);
+    console.log(`❌ Expected ${EXPECTED_INVALID_FILES} invalid files, but found ${errorCount}`);
   }
   
   // Check total expenses
-  if (totalExpenses === '600.00') {
+  if (totalExpenses === EXPECTED_TOTAL_EXPENSES) {
     console.log(`✅ Total expenses match expected: $${totalExpenses}`);
     testsPassed++;
   } else {
-    console.log(`❌ Expected total expenses $600.00, but found $${totalExpenses}`);
+    console.log(`❌ Expected total expenses $${EXPECTED_TOTAL_EXPENSES}, but found $${totalExpenses}`);
   }
   
   // Check total reimbursements
-  if (totalReimbursements === '185.00') {
+  if (totalReimbursements === EXPECTED_TOTAL_REIMBURSEMENTS) {
     console.log(`✅ Total reimbursements match expected: $${totalReimbursements}`);
     testsPassed++;
   } else {
-    console.log(`❌ Expected total reimbursements $185.00, but found $${totalReimbursements}`);
+    console.log(`❌ Expected total reimbursements $${EXPECTED_TOTAL_REIMBURSEMENTS}, but found $${totalReimbursements}`);
   }
   
   // Check total receipts
-  if (totalReceipts === '9') {
+  if (totalReceipts === EXPECTED_TOTAL_RECEIPTS) {
     console.log(`✅ Total receipts match expected: ${totalReceipts}`);
     testsPassed++;
   } else {
-    console.log(`❌ Expected total receipts 9, but found ${totalReceipts}`);
+    console.log(`❌ Expected total receipts ${EXPECTED_TOTAL_RECEIPTS}, but found ${totalReceipts}`);
   }
   
   console.log(`\nTest Results: ${testsPassed}/${testsTotal} tests passed`);
