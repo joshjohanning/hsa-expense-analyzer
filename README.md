@@ -14,9 +14,9 @@
 Expects receipts to be in single folder with the following naming convention:
 
 - Expenses:
-`<yyyy-mm-dd> - <description> - $<total>.pdf|png|jpg|whatever`
+`<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
 - Reimbursed expenses:
-`<yyyy-mm-dd> - <description> - $<total>.reimbursed.pdf|png|jpg|whatever`
+`<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
 
 > [!TIP]
 > When you receive a reimbursement from your HSA provider, rename the receipt to include `.reimbursed.` before the extension. This will help track which expenses have been reimbursed and which expenses can still be submitted.
@@ -38,8 +38,11 @@ Example file structure:
 
 > [!NOTE]
 >
-> - Any file extension for receipts is fine; only the date and $ amount are used
-> - The script detects reimbursements by looking for `.reimbursed.` anywhere in the filename.
+> - The tool is expecting the date to be in `yyyy-mm-dd` format and be a valid date
+> - The `" - "` dashes after the date before the amount must have spaces around them
+> - The amount must start with a `$` and be in format `$XX.XX` (e.g., $50.00, not $50,00 or $50)
+> - Any common file extension for receipts is fine (`.pdf`, `.jpg`, `.heic`, etc.); only the date and $ amount are used for calculations
+> - The tool detects reimbursements by looking for `.reimbursed.` anywhere in the filename
 
 ## Running
 
@@ -130,10 +133,18 @@ If you have files that don't match the expected naming pattern, you'll see a war
 ```text
 ⚠️  WARNING: The following files do not match the expected pattern:
 Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>
-Files with issues:
-  - 2021-01-15- doctor - 50.00.pdf
-  - 2021-01-15-wrong-format-missing-dashes.pdf
-  - wrong-format.pdf
+
+Filename                                                         Error
+--------                                                         -----
+2021-01-10 - doctor-incorrect-amount - $50,00.pdf                Amount "$50,00.pdf" should be a valid format like $50.00
+2021-01-10 - doctor-incorrect-amount - $50.pdf                   Amount "$50.pdf" should be a valid format like $50.00
+2021-01-15 - doctor-missing-dollar-sign - 50.00.pdf              Amount "50.00.pdf" should start with $
+2021-01-25 - doctor-no-extension - $50.00                        File is missing extension (should end with .pdf, .jpg, etc.)
+2021-01-30 - doctor-missing-amount.pdf                                  File name should have format "yyyy-mm-dd - description - $amount.ext"
+2021-01-30- doctor-missing-space-after-dash - $50.00.pdf         File name should have format "yyyy-mm-dd - description - $amount.ext"
+2021-1-25 - doctor-wrong-date-format - $50.00.pdf                Date "2021-1-25" should be yyyy-mm-dd format
+2021-25-01 - doctor-wrong-date-format - $50.00.pdf               Date "2021-25-01" should be yyyy-mm-dd format
+doctor-missing-date - $120.00.pdf                                File name should have format "yyyy-mm-dd - description - $amount.ext"
 ```
 
 [ci]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/ci.yml

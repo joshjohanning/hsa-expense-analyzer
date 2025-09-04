@@ -22,6 +22,8 @@ const argv = yargs(hideBin(process.argv))
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
   <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
   .help()
+  .alias('h', 'help')
+  .alias('v', 'version')
   .wrap(100)
   .argv;
 
@@ -30,7 +32,7 @@ const dirPath = argv.dirPath;
 function parseFileName(fileName) {
   const parts = fileName.split(" - ");
   if (parts.length !== 3) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File name should have format "yyyy-mm-dd - description - $amount.ext"` };
   }
 
   const date = parts[0];
@@ -38,14 +40,46 @@ function parseFileName(fileName) {
   
   // Validate date format (yyyy-mm-dd)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
   }
   
-  let amount = 0;
-  if (amountPart && amountPart.startsWith('$') && !isNaN(parseFloat(amountPart.substring(1)))) {
-    amount = parseFloat(amountPart.substring(1));
+  // Validate that it's actually a valid date
+  const dateObj = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
+  const [yearNum, monthNum, dayNum] = date.split('-').map(Number);
+  if (dateObj.getFullYear() !== yearNum || dateObj.getMonth() !== monthNum - 1 || dateObj.getDate() !== dayNum) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
+  }
+  
+  // Check if amount starts with $
+  if (!amountPart || !amountPart.startsWith('$')) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should start with $` };
+  }
+  
+  // Check if the filename has a proper file extension (ends with .ext pattern)
+  if (!/\.[a-zA-Z7]{2,5}$/.test(amountPart)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File is missing extension (should end with .pdf, .jpg, etc.)` };
+  }
+  
+  // Parse the amount - be more strict about format
+  let amountStr = amountPart.substring(1); // Remove the $
+  
+  // Handle .reimbursed. files - remove .reimbursed.ext pattern
+  if (amountStr.includes('.reimbursed.')) {
+    amountStr = amountStr.replace(/\.reimbursed\..+$/, '');
   } else {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false };
+    // Remove regular file extension (.pdf, .jpg, etc.)
+    amountStr = amountStr.replace(/\.[^.]+$/, '');
+  }
+  
+  // Check for valid decimal number format (digits with optional .digits, no commas)
+  if (!/^\d+\.\d{2}$/.test(amountStr)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid format like $50.00` };
+  }
+  
+  let amount = parseFloat(amountStr);
+  
+  if (isNaN(amount)) {
+    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid number` };
   }
   
   const year = date.split("-")[0];
@@ -61,17 +95,25 @@ function getTotalsByYear(dirPath) {
   const reimbursementsByYear = {};
   const receiptCounts = {};
   const invalidFiles = [];
-  const fileNames = fs.readdirSync(dirPath);
+  
+  let fileNames;
+  try {
+    fileNames = fs.readdirSync(dirPath);
+  } catch (error) {
+    console.error(`❌ Error: Cannot access directory`);
+    console.error(`   ${error.message}`);
+    process.exit(1);
+  }
 
   fileNames.forEach((fileName) => {
     if (fileName.startsWith(".")) {
       return;
     }
 
-    const { year, amount, isReimbursement, isValid } = parseFileName(fileName);
+    const { year, amount, isReimbursement, isValid, error } = parseFileName(fileName);
     
     if (!isValid) {
-      invalidFiles.push(fileName);
+      invalidFiles.push({ fileName, error });
       return;
     }
     
@@ -100,19 +142,27 @@ function getTotalsByYear(dirPath) {
 
 const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = getTotalsByYear(dirPath);
 
+// Check if no valid files were found
+const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
+if (years.length === 0) {
+  console.log("❌ Error: No valid receipt files found in the specified directory");
+  console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
+  process.exit(1);
+}
+
 // Display any invalid files
 if (invalidFiles.length > 0) {
-  console.log("\n⚠️  WARNING: The following files do not match the expected pattern:");
+  console.log("⚠️  WARNING: The following files do not match the expected pattern:");
   console.log("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>");
-  console.log("Files with issues:");
-  invalidFiles.forEach(file => {
-    console.log(`  - ${file}`);
+  console.log("\nFilename".padEnd(65) + " Error");
+  console.log("--------".padEnd(65) + "-----");
+  invalidFiles.forEach(({ fileName, error }) => {
+    console.log(fileName.padEnd(65) + error);
   });
-  console.log("\n");
+  console.log();
 }
 
 const result = {};
-const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 
 // Calculate totals
 let totalExpenses = 0;
