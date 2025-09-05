@@ -180,7 +180,7 @@ Average Receipts/Year: 2
 Most Expensive Year: 2022 ($250.00 [41.7%], 3 receipts [33.3%])
 ```
 
-If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output:
+If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output (and an "Invalid Receipts" count in the summary statistics):
 
 ```text
 ⚠️  WARNING: The following files do not match the expected pattern:
