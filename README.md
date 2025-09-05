@@ -28,8 +28,7 @@ Usage: hsa-expense-analyzer-cli --dirPath <path>
 Options:
   -d, --dirPath       The directory path containing receipt files                [string] [required]
       --no-color      Disable colored output                              [boolean] [default: false]
-      --summary-only  Show only summary statistics and hide year by year tables and charts
-                                                                          [boolean] [default: false]
+      --summary-only  Show only summary statistics                        [boolean] [default: false]
   -h, --help          Show help                                                            [boolean]
   -v, --version       Show version number                                                  [boolean]
 
