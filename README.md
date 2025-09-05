@@ -7,7 +7,73 @@
 
 🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
-![hsa-expense-analyzer-cli sample output](https://josh-ops.com/assets/screenshots/2025-09-04-hsa-expense-analyzer/hsa-expense-analyzer.png)
+![hsa-expense-analyzer-cli sample output](https://josh-ops.com/assets/screenshots/2025-09-04-hsa-expense-analyzer/hsa-expense-analyzer-v0.2.0.png)
+
+## Installation
+
+The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli):
+
+```bash
+npm install -g @joshjohanning/hsa-expense-analyzer-cli
+```
+
+## Usage
+
+```text
+$ hsa-expense-analyzer-cli --help
+A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊
+
+Usage: hsa-expense-analyzer-cli --dirPath <path>
+
+Options:
+  -d, --dirPath       The directory path containing receipt files                [string] [required]
+      --no-color      Disable colored output                              [boolean] [default: false]
+      --summary-only  Show only summary statistics                        [boolean] [default: false]
+  -h, --help          Show help                                                            [boolean]
+  -v, --version       Show version number                                                  [boolean]
+
+Expected file format:
+  <yyyy-mm-dd> - <description> - $<amount>.<ext>
+  <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>
+```
+
+### Usage Examples
+
+```bash
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
+
+# Show only summary statistics (no tables or charts)
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --summary-only
+
+# Disable colored output for plain text
+hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --no-color
+```
+
+## Local Development
+
+If you want to clone the repository locally and run from source:
+
+```bash
+git clone https://github.com/joshjohanning/hsa-expense-analyzer-cli.git
+cd hsa-expense-analyzer-cli
+npm install
+```
+
+Then run with:
+
+```bash
+npm run start -- --dirPath="/path/to/receipts"
+
+# Or with options
+npm run start -- --dirPath="/path/to/receipts" --summary-only
+npm run start -- --dirPath="/path/to/receipts" --no-color
+```
+
+Test with sample data:
+
+```bash
+npm run test
+```
 
 ## File Structure
 
@@ -43,32 +109,6 @@ Example file structure:
 > - The amount must start with a `$` and be in format `$XX.XX` (e.g., $50.00, not $50,00 or $50)
 > - Any common file extension for receipts is fine (`.pdf`, `.jpg`, `.heic`, etc.); only the date and $ amount are used for calculations
 > - The tool detects reimbursements by looking for `.reimbursed.` anywhere in the filename
-
-## Running
-
-### Install from npm
-
-The easiest way is to install as a global package from [npm](https://www.npmjs.com/package/@joshjohanning/hsa-expense-analyzer-cli) and run it:
-
-```bash
-npm install -g @joshjohanning/hsa-expense-analyzer-cli
-hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
-```
-
-### Local Development
-
-Or if you want to clone locally and hack on the code:
-
-```bash
-npm install
-npm run start -- --dirPath="/path/to/receipts"
-```
-
-You can also run locally using sample data to test the functionality:
-
-```bash
-npm run test
-```
 
 ## Example Output
 
@@ -126,9 +166,20 @@ Expenses vs Reimbursements by year
 2025 Expenses       ╢██████████░░░░░░░░░░ $125.00
 2025 Reimbursements ╢░░░░░░░░░░░░░░░░░░░░ $0.00
                     ╚════════════════════
+
+📊 Summary Statistics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Receipts Processed: 9
+Years Covered: 5 (2021 - 2025)
+Total Expenses: $600.00
+Total Reimbursements: $185.00 (30.8%)
+Total Reimburseable: $415.00 (69.2%)
+Average Expenses/Year: $120.00
+Average Receipts/Year: 2
+Most Expensive Year: 2022 ($250.00 [41.7%], 3 receipts [33.3%])
 ```
 
-If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output:
+If you have files that don't match the expected naming pattern, you'll see a warning at the top of the output (and an "Invalid Receipts" count in the summary statistics):
 
 ```text
 ⚠️  WARNING: The following files do not match the expected pattern:
@@ -145,6 +196,14 @@ Filename                                                     Error
 2021-1-25 - doctor-wrong-date-format - $50.00.pdf            Date "2021-1-25" should be yyyy-mm-dd format
 2021-25-01 - doctor-wrong-date-format - $50.00.pdf           Date "2021-25-01" should be yyyy-mm-dd format
 doctor-missing-date - $120.00.pdf                            File name should have format "yyyy-mm-dd - description - $amount.ext"
+
+...
+
+📊 Summary Statistics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Receipts Processed: 25
+Invalid Receipts: 16 (64.0%)
+...
 ```
 
 [ci]: https://github.com/joshjohanning/hsa-expense-analyzer-cli/actions/workflows/ci.yml

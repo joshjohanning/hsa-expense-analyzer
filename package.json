@@ -1,6 +1,6 @@
 {
   "name": "@joshjohanning/hsa-expense-analyzer-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files.",
   "keywords": [
     "hsa",
