@@ -20,53 +20,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Check version increment
-      if: github.event_name == 'pull_request'
-      run: |
-        # Check if this is a PR and get the files changed
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          echo "Checking files changed in PR..."
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-          echo "Files changed: $CHANGED_FILES"
-          
-          # Check if any JS or package files were changed
-          JS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '\.(js|json)$' | grep -E '(\.js$|package.*\.json$)' || true)
-          
-          if [ -z "$JS_CHANGED" ]; then
-            echo "⏭️  No JavaScript or package files changed, skipping version check"
-            exit 0
-          fi
-          
-          echo "JavaScript or package files changed, proceeding with version check..."
-        fi
-        
-        # Get the current version from package.json
-        CURRENT_VERSION=$(grep -o '"version": "[^"]*"' package.json | cut -d'"' -f4)
-        echo "Current version: $CURRENT_VERSION"
-        
-        # Get the latest tag
-        git fetch --tags
-        LATEST_TAG=$(git tag -l | sort -V | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | tail -n 1)
-        
-        if [ -z "$LATEST_TAG" ]; then
-          echo "No previous version tag found, this appears to be the first release."
-          exit 0
-        fi
-        
-        # Extract version from the latest tag
-        LATEST_VERSION=${LATEST_TAG#v}
-        echo "Latest released version: $LATEST_VERSION"
-        
-        # Compare versions
-        if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then
-          echo "❌ ERROR: Package version ($CURRENT_VERSION) is the same as the latest release. You need to increment it."
-          exit 1
-        elif [ "$(printf '%s\n' "$LATEST_VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" = "$CURRENT_VERSION" ]; then
-          echo "❌ ERROR: Package version ($CURRENT_VERSION) is lower than the latest release ($LATEST_VERSION)"
-          exit 1
-        else
-          echo "✅ Version has been properly incremented"
-        fi
+    - uses: joshjohanning/npm-version-check-action@v1
 
     - name: Setup Node.js
       uses: actions/setup-node@v5
