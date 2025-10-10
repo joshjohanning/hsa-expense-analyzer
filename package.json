@@ -59,7 +59,7 @@
   "devDependencies": {
     "@joshjohanning/make-coverage-badge-better": "^1.0.1",
     "eslint": "^9.37.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-github": "^5.1.8",
     "eslint-plugin-jest": "^28.14.0",
     "eslint-plugin-prettier": "^5.0.1",
