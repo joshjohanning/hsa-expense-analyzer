@@ -1,41 +1,46 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
-const prettyjson = require("prettyjson");
-const yargs = require("yargs/yargs");
-const { hideBin } = require("yargs/helpers");
-const chartscii = require("chartscii");
+import fs from 'fs';
+import path from 'path';
+import prettyjson from 'prettyjson';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import chartscii from 'chartscii';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const packageJson = require('../package.json');
 
 const argv = yargs(hideBin(process.argv))
-  .scriptName("hsa-expense-analyzer-cli")
-  .version(require('./package.json').version)
-  .usage("A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊\n")
-  .usage("Usage: $0 --dirPath <path>")
-  .option("dirPath", {
-    alias: "d",
-    type: "string",
+  .scriptName('hsa-expense-analyzer-cli')
+  .version(packageJson.version)
+  .usage('A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊\n')
+  .usage('Usage: $0 --dirPath <path>')
+  .option('dirPath', {
+    alias: 'd',
+    type: 'string',
     demandOption: true,
-    describe: "The directory path containing receipt files",
+    describe: 'The directory path containing receipt files'
   })
-  .option("no-color", {
-    type: "boolean",
+  .option('no-color', {
+    type: 'boolean',
     default: false,
-    describe: "Disable colored output"
+    describe: 'Disable colored output'
   })
-  .option("summary-only", {
-    type: "boolean",
+  .option('summary-only', {
+    type: 'boolean',
     default: false,
-    describe: "Show only summary statistics"
+    describe: 'Show only summary statistics'
   })
-  .epilogue(`Expected file format:
+  .epilogue(
+    `Expected file format:
   <yyyy-mm-dd> - <description> - $<amount>.<ext>
-  <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`)
+  <yyyy-mm-dd> - <description> - $<amount>.reimbursed.<ext>`
+  )
   .help()
   .alias('h', 'help')
   .alias('v', 'version')
-  .wrap(100)
-  .argv;
+  .wrap(100).argv;
 
 const dirPath = argv.dirPath;
 
@@ -52,16 +57,22 @@ const colors = {
   dim: '\x1b[2m'
 };
 
-// Helper function for colored output  
+// Helper function for colored output
 function colorize(text, color) {
   if (process.argv.includes('--no-color')) return text;
   return `${colors[color]}${text}${colors.reset}`;
 }
 
 function parseFileName(fileName) {
-  const parts = fileName.split(" - ");
+  const parts = fileName.split(' - ');
   if (parts.length !== 3) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File name should have format "yyyy-mm-dd - description - $amount.ext"` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `File name should have format "yyyy-mm-dd - description - $amount.ext"`
+    };
   }
 
   const date = parts[0];
@@ -69,24 +80,48 @@ function parseFileName(fileName) {
 
   // Validate date format (yyyy-mm-dd)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `Date "${date}" should be yyyy-mm-dd format`
+    };
   }
 
   // Validate that it's actually a valid date
   const dateObj = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
   const [yearNum, monthNum, dayNum] = date.split('-').map(Number);
   if (dateObj.getFullYear() !== yearNum || dateObj.getMonth() !== monthNum - 1 || dateObj.getDate() !== dayNum) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Date "${date}" should be yyyy-mm-dd format` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `Date "${date}" should be yyyy-mm-dd format`
+    };
   }
 
   // Check if amount starts with $
   if (!amountPart || !amountPart.startsWith('$')) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should start with $` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `Amount "${amountPart}" should start with $`
+    };
   }
 
   // Check if the filename has a proper file extension (ends with .ext pattern)
   if (!/\.[a-zA-Z7]{2,5}$/.test(amountPart)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `File is missing extension (should end with .pdf, .jpg, etc.)` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `File is missing extension (should end with .pdf, .jpg, etc.)`
+    };
   }
 
   // Parse the amount - be more strict about format
@@ -102,16 +137,28 @@ function parseFileName(fileName) {
 
   // Check for valid decimal number format (digits with optional .digits, no commas)
   if (!/^\d+\.\d{2}$/.test(amountStr)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid format like $50.00` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `Amount "${amountPart}" should be a valid format like $50.00`
+    };
   }
 
   let amount = parseFloat(amountStr);
 
   if (isNaN(amount)) {
-    return { year: null, amount: 0, isReimbursement: false, isValid: false, error: `Amount "${amountPart}" should be a valid number` };
+    return {
+      year: null,
+      amount: 0,
+      isReimbursement: false,
+      isValid: false,
+      error: `Amount "${amountPart}" should be a valid number`
+    };
   }
 
-  const year = date.split("-")[0];
+  const year = date.split('-')[0];
 
   // Check if this is a reimbursement
   const isReimbursement = fileName.includes('.reimbursed.');
@@ -134,8 +181,8 @@ function getTotalsByYear(dirPath) {
     process.exit(1);
   }
 
-  fileNames.forEach((fileName) => {
-    if (fileName.startsWith(".")) {
+  fileNames.forEach(fileName => {
+    if (fileName.startsWith('.')) {
       return;
     }
 
@@ -174,8 +221,8 @@ const { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles } = ge
 // Check if no valid files were found
 const years = [...new Set([...Object.keys(expensesByYear), ...Object.keys(reimbursementsByYear)])].sort();
 if (years.length === 0) {
-  console.log(colorize("❌ Error: No valid receipt files found in the specified directory", 'red'));
-  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
+  console.log(colorize('❌ Error: No valid receipt files found in the specified directory', 'red'));
+  console.log(colorize('Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>', 'dim'));
   process.exit(1);
 }
 
@@ -187,12 +234,18 @@ if (invalidFiles.length > 0) {
   const extraPadding = process.argv.includes('--no-color') ? -COLUMN_PADDING - 1 : COLUMN_PADDING;
   const padding = Math.max(maxFileNameLength + extraPadding, 'Filename'.length + extraPadding);
 
-  console.log(colorize("⚠️  WARNING: The following files do not match the expected pattern", 'yellow'));
-  console.log(colorize("Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>", 'dim'));
-  console.log(`\n${colorize('Filename', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('Error', 'cyan')}`);
-  console.log(`${colorize('--------', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('-----', 'cyan')}`);
+  console.log(colorize('⚠️  WARNING: The following files do not match the expected pattern', 'yellow'));
+  console.log(colorize('Expected pattern: <yyyy-mm-dd> - <description> - $<amount>.<ext>', 'dim'));
+  console.log(
+    `\n${colorize('Filename', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('Error', 'cyan')}`
+  );
+  console.log(
+    `${colorize('--------', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('-----', 'cyan')}`
+  );
   invalidFiles.forEach(({ fileName, error }) => {
-    console.log(`${colorize(fileName, 'yellow').padEnd(padding + colors.yellow.length + colors.reset.length)}${colorize(error, 'red')}`);
+    console.log(
+      `${colorize(fileName, 'yellow').padEnd(padding + colors.yellow.length + colors.reset.length)}${colorize(error, 'red')}`
+    );
   });
   console.log();
 }
@@ -216,7 +269,7 @@ for (const year of years) {
   result[year] = {
     expenses: `$${yearExpenses.toFixed(2)}`,
     reimbursements: `$${yearReimbursements.toFixed(2)}`,
-    receipts: yearReceipts,
+    receipts: yearReceipts
   };
 }
 
@@ -224,7 +277,7 @@ for (const year of years) {
 result['Total'] = {
   expenses: `$${totalExpenses.toFixed(2)}`,
   reimbursements: `$${totalReimbursements.toFixed(2)}`,
-  receipts: totalReceipts,
+  receipts: totalReceipts
 };
 
 // Show data table and charts unless summary-only mode
@@ -243,43 +296,43 @@ if (!argv['summary-only']) {
 
     expenseData.push({
       label: year,
-      value: expenseAmount,
+      value: expenseAmount
     });
 
     reimbursementData.push({
       label: year,
-      value: reimbursementAmount,
+      value: reimbursementAmount
     });
 
     // For combined chart
     combinedData.push({
       label: `${year} Exp`,
-      value: expenseAmount,
+      value: expenseAmount
     });
 
     combinedData.push({
       label: `${year} Rei`,
-      value: reimbursementAmount,
+      value: reimbursementAmount
     });
   }
 
   const chart = new chartscii(expenseData, {
     width: 20,
     height: years.length,
-    title: "Expenses by year",
-    fill: "░",
+    title: 'Expenses by year',
+    fill: '░',
     valueLabels: true,
-    valueLabelsPrefix: "$",
+    valueLabelsPrefix: '$',
     valueLabelsFloatingPoint: 2
   });
 
   const reimbursementChart = new chartscii(reimbursementData, {
     width: 20,
     height: years.length,
-    title: "Reimbursements by year",
-    fill: "░",
+    title: 'Reimbursements by year',
+    fill: '░',
     valueLabels: true,
-    valueLabelsPrefix: "$",
+    valueLabelsPrefix: '$',
     valueLabelsFloatingPoint: 2
   });
 
@@ -289,11 +342,8 @@ if (!argv['summary-only']) {
   console.log();
 
   // Create a manual comparison chart
-  console.log("Expenses vs Reimbursements by year");
-  const maxValue = Math.max(
-    ...Object.values(expensesByYear),
-    ...Object.values(reimbursementsByYear)
-  );
+  console.log('Expenses vs Reimbursements by year');
+  const maxValue = Math.max(...Object.values(expensesByYear), ...Object.values(reimbursementsByYear));
 
   for (const year of years) {
     const expenseAmount = expensesByYear[year] || 0;
@@ -302,20 +352,20 @@ if (!argv['summary-only']) {
     const expenseBarLength = Math.floor((expenseAmount / maxValue) * 20);
     const reimbursementBarLength = Math.floor((reimbursementAmount / maxValue) * 20);
 
-    const expenseBar = "█".repeat(expenseBarLength) + "░".repeat(20 - expenseBarLength);
-    const reimbursementBar = "█".repeat(reimbursementBarLength) + "░".repeat(20 - reimbursementBarLength);
+    const expenseBar = '█'.repeat(expenseBarLength) + '░'.repeat(20 - expenseBarLength);
+    const reimbursementBar = '█'.repeat(reimbursementBarLength) + '░'.repeat(20 - reimbursementBarLength);
 
     console.log(`${year} Expenses       ╢${expenseBar} $${expenseAmount.toFixed(2)}`);
     console.log(`${year} Reimbursements ╢${reimbursementBar} $${reimbursementAmount.toFixed(2)}`);
   }
 
-  console.log("                    ╚════════════════════");
+  console.log('                    ╚════════════════════');
   console.log();
 }
 
 // Summary statistics
-console.log("📊 Summary Statistics");
-console.log("━".repeat(50));
+console.log('📊 Summary Statistics');
+console.log('━'.repeat(50));
 
 const totalValidFiles = Object.values(receiptCounts).reduce((sum, count) => sum + count, 0);
 const totalInvalidFiles = invalidFiles.length;
@@ -347,5 +397,7 @@ if (years.length > 0) {
   const mostExpensiveYearAmount = expensesByYear[mostExpensiveYear] || 0;
   const expensePercentage = totalExpenses > 0 ? ((mostExpensiveYearAmount / totalExpenses) * 100).toFixed(1) : 0;
   const receiptPercentage = totalValidFiles > 0 ? ((mostExpensiveYearReceipts / totalValidFiles) * 100).toFixed(1) : 0;
-  console.log(`${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`);
+  console.log(
+    `${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`
+  );
 }
