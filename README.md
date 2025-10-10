@@ -4,6 +4,7 @@
 [![publish workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/hsa-expense-analyzer-cli/publish.yml?logo=github&label=publish%20workflow&labelColor=333)][publish]
 [![npm version](https://img.shields.io/npm/v/%40joshjohanning%2Fhsa-expense-analyzer-cli?logo=npm&labelColor=333)][npm]
 [![stars](https://img.shields.io/github/stars/joshjohanning/hsa-expense-analyzer-cli?style=flat&logo=github&color=yellow&label=stars%20★&labelColor=333)][stars]
+![Coverage](https://raw.githubusercontent.com/joshjohanning/hsa-expense-analyzer-cli/main/badges/coverage.svg)
 
 🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
@@ -20,10 +21,10 @@ npm install -g @joshjohanning/hsa-expense-analyzer-cli
 ## Usage
 
 ```text
-$ hsa-expense-analyzer-cli --help
+$ hsa-expense-analyzer --help
 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊
 
-Usage: hsa-expense-analyzer-cli --dirPath <path>
+Usage: hsa-expense-analyzer --dirPath <path>
 
 Options:
   -d, --dirPath       The directory path containing receipt files                [string] [required]
@@ -40,13 +41,13 @@ Expected file format:
 ### Usage Examples
 
 ```bash
-hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts"
+hsa-expense-analyzer --dirPath="/path/to/your/receipts"
 
 # Show only summary statistics (no tables or charts)
-hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --summary-only
+hsa-expense-analyzer --dirPath="/path/to/your/receipts" --summary-only
 
 # Disable colored output for plain text
-hsa-expense-analyzer-cli --dirPath="/path/to/your/receipts" --no-color
+hsa-expense-analyzer --dirPath="/path/to/your/receipts" --no-color
 ```
 
 ## Local Development
@@ -69,10 +70,16 @@ npm run start -- --dirPath="/path/to/receipts" --summary-only
 npm run start -- --dirPath="/path/to/receipts" --no-color
 ```
 
-Test with sample data:
+Run with sample data:
 
 ```bash
-npm run test
+npm run start:test-data
+```
+
+Run tests:
+
+```bash
+npm test
 ```
 
 ## File Structure
@@ -80,9 +87,9 @@ npm run test
 Expects receipts to be in single folder with the following naming convention:
 
 - Expenses:
-`<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
+  `<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
 - Reimbursed expenses:
-`<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
+  `<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
 
 > [!TIP]
 > When you receive a reimbursement from your HSA provider, rename the receipt to include `.reimbursed.` before the extension. This will help track which expenses have been reimbursed and which expenses can still be submitted.
@@ -133,7 +140,7 @@ Example file structure:
   expenses:       $125.00
   reimbursements: $0.00
   receipts:       1
-Total: 
+Total:
   expenses:       $600.00
   reimbursements: $185.00
   receipts:       9
