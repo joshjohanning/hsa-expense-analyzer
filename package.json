@@ -32,7 +32,7 @@
   },
   "preferGlobal": true,
   "bin": {
-    "hsa-expense-analyzer-cli": "src/main.js"
+    "hsa-expense-analyzer": "src/main.js"
   },
   "files": [
     "src/main.js",
