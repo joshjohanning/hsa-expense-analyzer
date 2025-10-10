@@ -418,10 +418,25 @@ function main() {
   }
 }
 
-// Only run main if this file is being executed directly (not imported)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
-
 // Export functions for testing
 export { parseFileName, getTotalsByYear, colorize };
+
+// Only run CLI when executed directly (not when imported as a module)
+// Check if this file is being run directly by comparing resolved paths
+const isMainModule = () => {
+  try {
+    // Resolve both paths to handle symlinks (from npm link)
+    const scriptPath = fs.realpathSync(process.argv[1]);
+    const modulePath = fs.realpathSync(__filename);
+    return scriptPath === modulePath;
+  } catch {
+    // Fallback check: handle npx temp files and direct execution
+    // Matches 'main.js' or 'main.<random-id>.js' (npx creates temp files with random IDs)
+    const MAIN_FILENAME_PATTERN = /main(\.[a-zA-Z0-9_-]+)?\.js$/;
+    return process.argv[1] && MAIN_FILENAME_PATTERN.test(fs.realpathSync(process.argv[1]));
+  }
+};
+
+if (isMainModule()) {
+  main();
+}
