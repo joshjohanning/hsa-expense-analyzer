@@ -15,18 +15,13 @@ on:
         default: true
 
 jobs:
-  publish_npm:
-    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.npm) }}
-
+  build:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
-      packages: write
       id-token: write
-
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      attestations: write
 
     steps:
       - name: Checkout
@@ -35,17 +30,56 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Build package tarball
+        run: npm pack
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: '*.tgz'
+
+      - name: Upload tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: '*.tgz'
+          retention-days: 1
+
+  publish_npm:
+    needs: build
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.npm) }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
       - name: NPM publish
-        run: npm publish --provenance --access public
+        run: npm publish *.tgz --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish_gh:
+    needs: build
     if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.gh) }}
 
     runs-on: ubuntu-latest
@@ -53,24 +87,20 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
-
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Download tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: package
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 20
           registry-url: 'https://npm.pkg.github.com'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: GitHub Packages publish
-        run: npm publish --access public
+        run: npm publish *.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
