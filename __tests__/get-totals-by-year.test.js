@@ -86,11 +86,11 @@ describe('getTotalsByYear', () => {
   test('should ignore hidden files starting with dot', () => {
     // Test-data now has .DS_Store and .hidden-file which should be ignored
     const result = getTotalsByYear(testDataDir);
-    
+
     // Hidden files should not appear in invalidFiles
     const hiddenFileNames = result.invalidFiles.map(f => f.fileName).filter(name => name.startsWith('.'));
     expect(hiddenFileNames.length).toBe(0);
-    
+
     // Results should still be valid
     expect(result.expensesByYear).toBeDefined();
     expect(Object.keys(result.expensesByYear).length).toBeGreaterThan(0);
