@@ -183,6 +183,115 @@ function getTotalsByYear(directory) {
   return { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles };
 }
 
+function calculateSummaryStats(years, expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles) {
+  const totalValidFiles = Object.values(receiptCounts).reduce((sum, count) => sum + count, 0);
+  const totalInvalidFiles = invalidFiles.length;
+  const totalFiles = totalValidFiles + totalInvalidFiles;
+
+  let totalExpenses = 0;
+  let totalReimbursements = 0;
+
+  for (const year of years) {
+    totalExpenses += expensesByYear[year] || 0;
+    totalReimbursements += reimbursementsByYear[year] || 0;
+  }
+
+  const invalidFilePercentage = totalFiles > 0 ? ((totalInvalidFiles / totalFiles) * 100).toFixed(1) : 0;
+  const avgExpensePerYear = years.length > 0 ? (totalExpenses / years.length).toFixed(2) : 0;
+  const avgReceiptsPerYear = years.length > 0 ? Math.round(totalValidFiles / years.length) : 0;
+  const reimbursementRate = totalExpenses > 0 ? ((totalReimbursements / totalExpenses) * 100).toFixed(1) : 0;
+  const totalReimburseable = totalExpenses - totalReimbursements;
+  const reimburseableRate = totalExpenses > 0 ? ((totalReimburseable / totalExpenses) * 100).toFixed(1) : 0;
+
+  // Find the most expensive year
+  let mostExpensiveYear = null;
+  let mostExpensiveYearAmount = 0;
+  let mostExpensiveYearReceipts = 0;
+
+  if (years.length > 0) {
+    mostExpensiveYear = years.reduce((maxYear, year) =>
+      (expensesByYear[year] || 0) > (expensesByYear[maxYear] || 0) ? year : maxYear
+    );
+    mostExpensiveYearReceipts = receiptCounts[mostExpensiveYear] || 0;
+    mostExpensiveYearAmount = expensesByYear[mostExpensiveYear] || 0;
+  }
+
+  const expensePercentage = totalExpenses > 0 ? ((mostExpensiveYearAmount / totalExpenses) * 100).toFixed(1) : 0;
+  const receiptPercentage = totalValidFiles > 0 ? ((mostExpensiveYearReceipts / totalValidFiles) * 100).toFixed(1) : 0;
+
+  return {
+    totalFiles,
+    totalValidFiles,
+    totalInvalidFiles,
+    invalidFilePercentage,
+    totalExpenses,
+    totalReimbursements,
+    totalReimburseable,
+    reimbursementRate,
+    reimburseableRate,
+    avgExpensePerYear,
+    avgReceiptsPerYear,
+    mostExpensiveYear,
+    mostExpensiveYearAmount,
+    mostExpensiveYearReceipts,
+    expensePercentage,
+    receiptPercentage
+  };
+}
+
+function buildYearlyResultObject(years, expensesByYear, reimbursementsByYear, receiptCounts) {
+  const result = {};
+  let totalExpenses = 0;
+  let totalReimbursements = 0;
+  let totalReceipts = 0;
+
+  for (const year of years) {
+    const yearExpenses = expensesByYear[year] || 0;
+    const yearReimbursements = reimbursementsByYear[year] || 0;
+    const yearReceipts = receiptCounts[year] || 0;
+
+    totalExpenses += yearExpenses;
+    totalReimbursements += yearReimbursements;
+    totalReceipts += yearReceipts;
+
+    result[year] = {
+      expenses: `$${yearExpenses.toFixed(2)}`,
+      reimbursements: `$${yearReimbursements.toFixed(2)}`,
+      receipts: yearReceipts
+    };
+  }
+
+  result['Total'] = {
+    expenses: `$${totalExpenses.toFixed(2)}`,
+    reimbursements: `$${totalReimbursements.toFixed(2)}`,
+    receipts: totalReceipts
+  };
+
+  return result;
+}
+
+function prepareChartData(years, expensesByYear, reimbursementsByYear) {
+  const expenseData = [];
+  const reimbursementData = [];
+
+  for (const year of years) {
+    const expenseAmount = expensesByYear[year] || 0;
+    const reimbursementAmount = reimbursementsByYear[year] || 0;
+
+    expenseData.push({
+      label: year,
+      value: expenseAmount
+    });
+
+    reimbursementData.push({
+      label: year,
+      value: reimbursementAmount
+    });
+  }
+
+  return { expenseData, reimbursementData };
+}
+
 // Main CLI execution
 function main() {
   const argv = yargs(hideBin(process.argv))
@@ -262,71 +371,14 @@ function main() {
     console.log();
   }
 
-  const result = {};
-
-  // Calculate totals
-  let totalExpenses = 0;
-  let totalReimbursements = 0;
-  let totalReceipts = 0;
-
-  for (const year of years) {
-    const yearExpenses = expensesByYear[year] || 0;
-    const yearReimbursements = reimbursementsByYear[year] || 0;
-    const yearReceipts = receiptCounts[year] || 0;
-
-    totalExpenses += yearExpenses;
-    totalReimbursements += yearReimbursements;
-    totalReceipts += yearReceipts;
-
-    result[year] = {
-      expenses: `$${yearExpenses.toFixed(2)}`,
-      reimbursements: `$${yearReimbursements.toFixed(2)}`,
-      receipts: yearReceipts
-    };
-  }
-
-  // Add totals row
-  result['Total'] = {
-    expenses: `$${totalExpenses.toFixed(2)}`,
-    reimbursements: `$${totalReimbursements.toFixed(2)}`,
-    receipts: totalReceipts
-  };
+  const result = buildYearlyResultObject(years, expensesByYear, reimbursementsByYear, receiptCounts);
 
   // Show data table and charts unless summary-only mode
   if (!argv['summary-only']) {
     console.log(prettyjson.render(result));
     console.log();
 
-    // Create data arrays for charts
-    const expenseData = [];
-    const reimbursementData = [];
-    const combinedData = [];
-
-    for (const year of years) {
-      const expenseAmount = expensesByYear[year] || 0;
-      const reimbursementAmount = reimbursementsByYear[year] || 0;
-
-      expenseData.push({
-        label: year,
-        value: expenseAmount
-      });
-
-      reimbursementData.push({
-        label: year,
-        value: reimbursementAmount
-      });
-
-      // For combined chart
-      combinedData.push({
-        label: `${year} Exp`,
-        value: expenseAmount
-      });
-
-      combinedData.push({
-        label: `${year} Rei`,
-        value: reimbursementAmount
-      });
-    }
+    const { expenseData, reimbursementData } = prepareChartData(years, expensesByYear, reimbursementsByYear);
 
     const chart = new chartscii(expenseData, {
       width: 20,
@@ -379,47 +431,34 @@ function main() {
   console.log('📊 Summary Statistics');
   console.log('━'.repeat(50));
 
-  const totalValidFiles = Object.values(receiptCounts).reduce((sum, count) => sum + count, 0);
-  const totalInvalidFiles = invalidFiles.length;
-  const totalFiles = totalValidFiles + totalInvalidFiles;
-  const invalidFilePercentage = totalFiles > 0 ? ((totalInvalidFiles / totalFiles) * 100).toFixed(1) : 0;
-  const avgExpensePerYear = years.length > 0 ? (totalExpenses / years.length).toFixed(2) : 0;
-  const avgReceiptsPerYear = years.length > 0 ? Math.round(totalValidFiles / years.length) : 0;
-  const reimbursementRate = totalExpenses > 0 ? ((totalReimbursements / totalExpenses) * 100).toFixed(1) : 0;
-  const totalReimburseable = totalExpenses - totalReimbursements; // Money you could still get reimbursed
-  const reimburseableRate = totalExpenses > 0 ? ((totalReimburseable / totalExpenses) * 100).toFixed(1) : 0;
+  const stats = calculateSummaryStats(years, expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles);
 
-  console.log(`${colorize('Total Receipts Processed:', 'cyan')} ${totalFiles}`);
-  if (totalInvalidFiles > 0) {
-    console.log(`${colorize('Invalid Receipts:', 'yellow')} ${totalInvalidFiles} (${invalidFilePercentage}%)`);
+  console.log(`${colorize('Total Receipts Processed:', 'cyan')} ${stats.totalFiles}`);
+  if (stats.totalInvalidFiles > 0) {
+    console.log(
+      `${colorize('Invalid Receipts:', 'yellow')} ${stats.totalInvalidFiles} (${stats.invalidFilePercentage}%)`
+    );
   }
   console.log(`${colorize('Years Covered:', 'cyan')} ${years.length} (${years[0]} - ${years[years.length - 1]})`);
-  console.log(`${colorize('Total Expenses:', 'cyan')} $${totalExpenses.toFixed(2)}`);
+  console.log(`${colorize('Total Expenses:', 'cyan')} $${stats.totalExpenses.toFixed(2)}`);
   console.log(
-    `${colorize('Total Reimbursements:', 'cyan')} $${totalReimbursements.toFixed(2)} (${reimbursementRate}%)`
+    `${colorize('Total Reimbursements:', 'cyan')} $${stats.totalReimbursements.toFixed(2)} (${stats.reimbursementRate}%)`
   );
-  console.log(`${colorize('Total Reimburseable:', 'green')} $${totalReimburseable.toFixed(2)} (${reimburseableRate}%)`);
-  console.log(`${colorize('Average Expenses/Year:', 'cyan')} $${avgExpensePerYear}`);
-  console.log(`${colorize('Average Receipts/Year:', 'cyan')} ${avgReceiptsPerYear}`);
+  console.log(
+    `${colorize('Total Reimburseable:', 'green')} $${stats.totalReimburseable.toFixed(2)} (${stats.reimburseableRate}%)`
+  );
+  console.log(`${colorize('Average Expenses/Year:', 'cyan')} $${stats.avgExpensePerYear}`);
+  console.log(`${colorize('Average Receipts/Year:', 'cyan')} ${stats.avgReceiptsPerYear}`);
 
-  // Find the most expensive year
-  if (years.length > 0) {
-    const mostExpensiveYear = years.reduce((maxYear, year) =>
-      (expensesByYear[year] || 0) > (expensesByYear[maxYear] || 0) ? year : maxYear
-    );
-    const mostExpensiveYearReceipts = receiptCounts[mostExpensiveYear] || 0;
-    const mostExpensiveYearAmount = expensesByYear[mostExpensiveYear] || 0;
-    const expensePercentage = totalExpenses > 0 ? ((mostExpensiveYearAmount / totalExpenses) * 100).toFixed(1) : 0;
-    const receiptPercentage =
-      totalValidFiles > 0 ? ((mostExpensiveYearReceipts / totalValidFiles) * 100).toFixed(1) : 0;
+  if (stats.mostExpensiveYear) {
     console.log(
-      `${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`
+      `${colorize('Most Expensive Year:', 'cyan')} ${stats.mostExpensiveYear} ($${stats.mostExpensiveYearAmount.toFixed(2)} [${stats.expensePercentage}%], ${stats.mostExpensiveYearReceipts} receipts [${stats.receiptPercentage}%])`
     );
   }
 }
 
 // Export functions for testing
-export { parseFileName, getTotalsByYear, colorize };
+export { parseFileName, getTotalsByYear, colorize, calculateSummaryStats, buildYearlyResultObject, prepareChartData };
 
 // Only run CLI when executed directly (not when imported as a module)
 // Check if this file is being run directly by comparing resolved paths
