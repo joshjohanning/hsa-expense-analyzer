@@ -41,7 +41,8 @@ export default [
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-console': 'off', // Allow console statements in CLI tool
       'prefer-const': 'error',
-      'no-var': 'error'
+      'no-var': 'error',
+      'eslint-comments/no-use': 'off' // Allow eslint disable comments for test files
     }
   }
 ];
