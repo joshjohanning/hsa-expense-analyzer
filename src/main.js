@@ -82,7 +82,7 @@ function parseFileName(fileName) {
   }
 
   // Check if the filename has a proper file extension (ends with .ext pattern)
-  if (!/\.[a-zA-Z7]{2,5}$/.test(amountPart)) {
+  if (!/\.[a-zA-Z]{2,5}$/.test(amountPart)) {
     return {
       year: null,
       amount: 0,
