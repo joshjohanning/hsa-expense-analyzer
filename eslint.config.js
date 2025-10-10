@@ -39,7 +39,7 @@ export default [
       quotes: ['error', 'single', { allowTemplateLiterals: true }],
       semi: ['error', 'always'],
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': 'warn',
+      'no-console': 'off', // Allow console statements in CLI tool
       'prefer-const': 'error',
       'no-var': 'error'
     }
