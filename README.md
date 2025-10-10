@@ -4,7 +4,7 @@
 [![publish workflow](https://img.shields.io/github/actions/workflow/status/joshjohanning/hsa-expense-analyzer-cli/publish.yml?logo=github&label=publish%20workflow&labelColor=333)][publish]
 [![npm version](https://img.shields.io/npm/v/%40joshjohanning%2Fhsa-expense-analyzer-cli?logo=npm&labelColor=333)][npm]
 [![stars](https://img.shields.io/github/stars/joshjohanning/hsa-expense-analyzer-cli?style=flat&logo=github&color=yellow&label=stars%20★&labelColor=333)][stars]
-![Coverage](./badges/coverage.svg)
+![Coverage](https://raw.githubusercontent.com/joshjohanning/hsa-expense-analyzer-cli/main/badges/coverage.svg)
 
 🩺 🧾 📊 A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files
 
