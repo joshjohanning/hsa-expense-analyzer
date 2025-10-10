@@ -1,6 +1,6 @@
 {
   "name": "@joshjohanning/hsa-expense-analyzer-cli",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from a folder of receipt files.",
   "keywords": [
     "hsa",
@@ -26,15 +26,16 @@
   },
   "homepage": "https://github.com/joshjohanning/hsa-expense-analyzer-cli#readme",
   "license": "MIT",
+  "type": "module",
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=20.0.0"
   },
   "preferGlobal": true,
   "bin": {
-    "hsa-expense-analyzer-cli": "main.js"
+    "hsa-expense-analyzer-cli": "src/main.js"
   },
   "files": [
-    "main.js",
+    "src/main.js",
     "LICENSE",
     "README.md"
   ],
@@ -42,12 +43,30 @@
     "access": "public"
   },
   "scripts": {
-    "start": "node main.js",
-    "test": "node test.js"
+    "start": "node src/main.js",
+    "start:test-data": "npm run start -- --dirPath=test-data/",
+    "coverage": "npx make-coverage-badge --label-color '#333' --output-path ./badges/coverage.svg",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' npx jest",
+    "ci-test": "NODE_OPTIONS='--experimental-vm-modules' npx jest --coverage",
+    "all": "npm run format:write && npm run lint && npm run ci-test && npm run coverage"
   },
   "dependencies": {
     "chartscii": "^3.2.0",
     "prettyjson": "^1.2.5",
     "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-github": "^5.1.8",
+    "eslint-plugin-jest": "^28.14.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "globals": "^16.4.0",
+    "jest": "^30.2.0",
+    "make-coverage-badge": "^1.2.0",
+    "prettier": "^3.0.0"
   }
 }
