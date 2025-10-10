@@ -80,9 +80,9 @@ npm run test
 Expects receipts to be in single folder with the following naming convention:
 
 - Expenses:
-`<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
+  `<yyyy-mm-dd> - <description> - $<amount>.pdf|png|jpg|whatever`
 - Reimbursed expenses:
-`<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
+  `<yyyy-mm-dd> - <description> - $<amount>.reimbursed.pdf|png|jpg|whatever`
 
 > [!TIP]
 > When you receive a reimbursement from your HSA provider, rename the receipt to include `.reimbursed.` before the extension. This will help track which expenses have been reimbursed and which expenses can still be submitted.
@@ -133,7 +133,7 @@ Example file structure:
   expenses:       $125.00
   reimbursements: $0.00
   receipts:       1
-Total: 
+Total:
   expenses:       $600.00
   reimbursements: $185.00
   receipts:       9
