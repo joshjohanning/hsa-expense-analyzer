@@ -35,9 +35,7 @@
     "hsa-expense-analyzer": "src/main.js"
   },
   "files": [
-    "src/main.js",
-    "LICENSE",
-    "README.md"
+    "src"
   ],
   "publishConfig": {
     "access": "public"
@@ -45,7 +43,7 @@
   "scripts": {
     "start": "node src/main.js",
     "start:test-data": "npm run start -- --dirPath=test-data/",
-    "coverage": "npx make-coverage-badge --label-color '#333' --output-path ./badges/coverage.svg",
+    "coverage": "npx @joshjohanning/make-coverage-badge-better --label-color '#333' --output-path ./badges/coverage.svg",
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
     "lint": "npx eslint .",
@@ -59,6 +57,7 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
+    "@joshjohanning/make-coverage-badge-better": "^1.0.0",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-github": "^5.1.8",
@@ -66,7 +65,6 @@
     "eslint-plugin-prettier": "^5.0.1",
     "globals": "^16.4.0",
     "jest": "^30.2.0",
-    "make-coverage-badge": "^1.2.0",
     "prettier": "^3.0.0"
   }
 }
