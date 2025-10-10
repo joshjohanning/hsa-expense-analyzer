@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
+import fs, { readFileSync } from 'fs';
 import prettyjson from 'prettyjson';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import chartscii from 'chartscii';
-import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const require = createRequire(import.meta.url);
-const packageJson = require('../package.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 const argv = yargs(hideBin(process.argv))
-  .scriptName('hsa-expense-analyzer-cli')
+  .scriptName('hsa-expense-analyzer')
   .version(packageJson.version)
   .usage('A Node.js CLI tool that analyzes HSA expenses and reimbursements by year from receipt files. 📊\n')
   .usage('Usage: $0 --dirPath <path>')
@@ -90,7 +91,7 @@ function parseFileName(fileName) {
   }
 
   // Validate that it's actually a valid date
-  const dateObj = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
+  const dateObj = new Date(`${date}T00:00:00`); // Add time to avoid timezone issues
   const [yearNum, monthNum, dayNum] = date.split('-').map(Number);
   if (dateObj.getFullYear() !== yearNum || dateObj.getMonth() !== monthNum - 1 || dateObj.getDate() !== dayNum) {
     return {
@@ -146,7 +147,7 @@ function parseFileName(fileName) {
     };
   }
 
-  let amount = parseFloat(amountStr);
+  const amount = parseFloat(amountStr);
 
   if (isNaN(amount)) {
     return {
@@ -166,7 +167,7 @@ function parseFileName(fileName) {
   return { year, amount, isReimbursement, isValid: true };
 }
 
-function getTotalsByYear(dirPath) {
+function getTotalsByYear(directory) {
   const expensesByYear = {};
   const reimbursementsByYear = {};
   const receiptCounts = {};
@@ -174,23 +175,23 @@ function getTotalsByYear(dirPath) {
 
   let fileNames;
   try {
-    fileNames = fs.readdirSync(dirPath);
+    fileNames = fs.readdirSync(directory);
   } catch (error) {
     console.error(colorize(`❌ Error: Cannot access directory`, 'red'));
     console.error(colorize(`   ${error.message}`, 'dim'));
     process.exit(1);
   }
 
-  fileNames.forEach(fileName => {
+  for (const fileName of fileNames) {
     if (fileName.startsWith('.')) {
-      return;
+      continue;
     }
 
     const { year, amount, isReimbursement, isValid, error } = parseFileName(fileName);
 
     if (!isValid) {
       invalidFiles.push({ fileName, error });
-      return;
+      continue;
     }
 
     if (amount > 0) {
@@ -211,7 +212,7 @@ function getTotalsByYear(dirPath) {
 
       receiptCounts[year]++;
     }
-  });
+  }
 
   return { expensesByYear, reimbursementsByYear, receiptCounts, invalidFiles };
 }
@@ -242,11 +243,11 @@ if (invalidFiles.length > 0) {
   console.log(
     `${colorize('--------', 'cyan').padEnd(padding + colors.cyan.length + colors.reset.length)}${colorize('-----', 'cyan')}`
   );
-  invalidFiles.forEach(({ fileName, error }) => {
+  for (const { fileName, error } of invalidFiles) {
     console.log(
       `${colorize(fileName, 'yellow').padEnd(padding + colors.yellow.length + colors.reset.length)}${colorize(error, 'red')}`
     );
-  });
+  }
   console.log();
 }
 
@@ -401,3 +402,6 @@ if (years.length > 0) {
     `${colorize('Most Expensive Year:', 'cyan')} ${mostExpensiveYear} ($${mostExpensiveYearAmount.toFixed(2)} [${expensePercentage}%], ${mostExpensiveYearReceipts} receipts [${receiptPercentage}%])`
   );
 }
+
+// Export functions for testing
+export { parseFileName, getTotalsByYear, colorize };
