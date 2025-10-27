@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Download tarball
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: package
 
@@ -92,7 +92,7 @@ jobs:
 
     steps:
       - name: Download tarball
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: package
 
