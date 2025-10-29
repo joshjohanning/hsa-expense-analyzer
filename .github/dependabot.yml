@@ -23,10 +23,6 @@ updates:
     commit-message:
       prefix: 'chore'
     groups:
-      github-actions:
-        patterns:
-          - '@actions/*'
-          - '@octokit/*'
       eslint:
         patterns:
           - 'eslint*'
