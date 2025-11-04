@@ -39,6 +39,7 @@ jobs:
         run: npm test
 
       - name: Link package globally
+        if: always()
         run: npm link
 
       - name: Publish sample results to job summary
